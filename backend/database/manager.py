@@ -1,0 +1,131 @@
+from sqlalchemy import select, update, insert, delete, ForeignKey, PrimaryKeyConstraint, Engine, Table, Column, Integer, String, BigInteger, MetaData, create_engine
+
+metadata: MetaData = MetaData()
+
+users: Table = Table(
+    "users",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("username", String),
+    Column("password", String),
+    Column("maximp", Integer,),
+    Column("maxnot", Integer)
+)
+
+slot: Table = Table(
+    "slot",
+    metadata,
+    Column("id", Integer),
+    Column("giorno", String),
+    Column("ora_inizio", String),
+    Column("ora_fine", String),
+    Column("peso", String),
+    PrimaryKeyConstraint("id", "giorno", "ora_inizio", "ora_fine")
+)
+
+sessions: Table = Table(
+    "sessions",
+    metadata,
+    Column("user", String, ForeignKey("users.username"), nullable=False),
+    Column("token", String, primary_key=True),
+    Column("scadenza", BigInteger, nullable=False)
+)
+
+engine: Engine = create_engine("sqlite:///database/db.sqlite3")
+
+
+class Query:
+
+    @staticmethod
+    def getInfoFromUser(name: str) -> dict | None:
+        with engine.connect() as conn:
+            query = select(users).where(
+                users.c["username"] == name
+            )
+            return conn.execute(query).mappings().first()
+
+    @staticmethod
+    def getInfoBySessionToken(token: str) -> dict | None:
+        with engine.connect() as conn:
+            query = select(sessions).where(
+                sessions.c["token"] == token
+            )
+            return conn.execute(query).mappings().first()
+
+    @staticmethod
+    def getSessionsFromUser(user: str) -> list[dict]:
+        with engine.connect() as conn:
+            query = select(sessions).where(
+                sessions.c["user"] == user
+            ).order_by(
+                sessions.c["scadenza"]
+            )
+            return conn.execute(query).mappings().all()
+
+    @staticmethod
+    def insertNewSession(user: str, token: str, expiring: float) -> bool:
+        with engine.begin() as conn:
+            query = insert(sessions).values(
+                user = user,
+                token = token,
+                scadenza = expiring
+            )
+            return conn.execute(query).rowcount == 1
+
+    @staticmethod
+    def deleteSessionToken(token: str) -> bool:
+        with engine.begin() as conn:
+            query = delete(sessions).where(
+                sessions.c["token"] == token
+            )
+            return conn.execute(query).rowcount == 1
+
+    @staticmethod
+    def getTimeslotsFromId(userId: int) -> list[dict]:
+        with engine.connect() as conn:
+            query = select(slot).where(
+                slot.c["id"] == userId
+            )
+            return conn.execute(query).mappings()
+
+    @staticmethod
+    def getAllTimeslots() -> list[dict]:
+        with engine.connect() as conn:
+            query = select(slot).order_by(
+                slot.c.id, slot.c.giorno, slot.c.ora_inizio
+            )
+            return conn.execute(query).mappings()
+        
+    @staticmethod
+    def deleteSlotsFromUserId(userId: int) -> None:
+        cout(userId)
+        with engine.begin() as conn:
+            query = delete(slot).where(
+                slot.c["id"] == userId
+            )
+            conn.execute(query)
+
+    @staticmethod
+    def insertSlotsForUserId(userId: int, day: str, slotTime: list[str, str], weight: str) -> None:
+        with engine.begin() as conn:
+            query = insert(slot).values(
+                id = userId,
+                giorno = day,
+                ora_inizio = slotTime[0],
+                ora_fine = slotTime[1],
+                peso = weight
+            )
+            conn.execute(query)
+
+
+def cout(obj: any):
+    with open("cout.txt", "a") as file:
+        file.write(str(obj) + "\n")
+
+'''
+with engine.connect() as conn:
+    conn.execute(
+        update(users).values(password=bcrypt.hashpw("ciaone".encode("utf-8"), bcrypt.gensalt()))
+    )
+    conn.commit()
+'''
