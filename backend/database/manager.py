@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, insert, delete, ForeignKey, PrimaryKeyConstraint, Engine, Table, Column, Integer, String, BigInteger, MetaData, create_engine
+from sqlalchemy import select, update, insert, delete, func, case, ForeignKey, PrimaryKeyConstraint, Engine, Table, Column, Integer, String, BigInteger, MetaData, create_engine
 
 metadata: MetaData = MetaData()
 
@@ -117,7 +117,49 @@ class Query:
             )
             conn.execute(query)
 
+    @staticmethod
+    def getAllUsersInfo():
+        with engine.connect() as conn:
+            query = select(users).where(
+                users.c["id"] != 0
+            )
+            return conn.execute(query).mappings()
+        
+    @staticmethod
+    def getMaxCountFromUser(userId: int):
+        with engine.connect() as conn:
+            query = (
+                select(
+                    slot.c["peso"],
+                    func.count().label("count")
+                )
+                .where(
+                    slot.c["id"] == userId
+                ).group_by(
+                    slot.c["peso"]
+                ).order_by(
+                    case(
+                        [(slot.c["peso"] == 'not', 0),
+                        (slot.c["peso"] == 'NOT', 1)],
+                        else_=2
+                    )
+                )
+            )
+            return conn.execute(query).mappings()
+        
+    @staticmethod
+    def insertUser(user: str, passw: str, maxnot: int, maxNOT: int):
+        with engine.begin() as conn:
+            query = users.insert().values(
+                username=user,
+                password=passw,
+                maximp=maxNOT,
+                maxnot=maxnot
+            )
+            conn.execute(query)
 
+
+# debug printer on file stdout
 def cout(obj: any):
     with open("cout.txt", "a") as file:
         file.write(str(obj) + "\n")

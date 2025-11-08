@@ -27,6 +27,12 @@ class UpdateInput(BaseModel):
     user: str
     timeslots: list[Timeslot]
 
+class RegisterInput(BaseModel):
+    user: str
+    passw: str
+    maxUnd: int
+    maxImp: int
+
 
 class DBManager:
 
@@ -83,6 +89,51 @@ class DBManager:
         for s in timeslots:
             timeslot: dict = dict(s)
             Query.insertSlotsForUserId(userId, timeslot["day"], timeslot["slot"], timeslot["weight"])
+
+    @staticmethod
+    def getAllUsers() -> list[dict]:
+        result: dict[list] = Query.getAllUsersInfo()
+        table: list[dict] = []
+        for row in result:
+            table.append({
+                "id": row["id"],
+                "name": row["username"],
+                "mxUnd": row["maxnot"],
+                "mxImp": row["maximp"]
+            })
+        return table
+    
+    """
+    Future edit constraints
+    # check if user preferences are compatible with maxnot and maxNOT
+        count: list[dict] = Query.getMaxCountFromUser(user["id"])
+        max_n: int = 0
+        max_N: int = 0
+
+        if len(count)==1:
+            if count[0]["peso"]=="not":
+                max_n = count[0]["count"]
+            else:
+                max_N = count[0]["count"]
+        else:
+            max_n = count[0]["count"]
+            max_N = count[1]["count"]
+
+        if max_n < maxnot:
+            issues.append(f"'Better Not' value for {name} is understimated.")
+        if max_N < maxNOT:
+            issues.append(f"'Impossible' value for {name} is understimated.")
+
+    """
+
+    @staticmethod
+    def registerUser(name: str, password: str, maxnot: int, maxNOT: int) -> bool:
+        user: dict = Query.getInfoFromUser(name)
+        if user:
+            return False
+        encpsw: str = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        Query.insertUser(name, encpsw, maxnot, maxNOT)
+        return True
 
 
 class FAST:

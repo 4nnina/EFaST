@@ -13,7 +13,18 @@ interface Info {
     timeslots: Timeslot[]
 }
 
-export async function getInfo(user: string): Promise<Info | null> {
+export interface User {
+    id: number,
+    name: string,
+    mxUnd: number,
+    mxImp: number
+}
+
+interface BaseResponse {
+    ok: boolean
+}
+
+export async function getInfo(user: string) {
 
     if (user=="nothing") { return null; }
 
@@ -41,6 +52,53 @@ export async function updateInfo(user: string, info: any) {
         alert("All your preferences were saved succesfully!")
     } catch (error) {
         console.log("Error while updating user info:", error);
+    }
+
+}
+
+export async function getUsers() {
+
+    try {
+        const response = await axios.get("http://localhost:5000/users");
+        return response.data as User[];
+    } catch (error) {
+        console.log("Error while fetching all user info:", error);
+        return [] as User[];
+    }
+
+}
+
+export async function registerUser(name: string, password: string, mxUnd: number, mxImp: number) {
+
+    try {
+        const response = await axios.post("http://localhost:5000/register", {
+            user: name,
+            pass: password,
+            maxUnd: mxUnd,
+            maxImp: mxImp
+        });
+        return response.data as BaseResponse;
+    } catch (error) {
+        console.log("Error while fetching all user info:", error);
+        return {
+            ok: false
+        } as BaseResponse;
+    }
+
+}
+
+export async function deleteUser(name: string) {
+
+    try {
+        const response = await axios.delete("http://localhost:5000/remove", {
+            data: {user: name}
+        });
+        return response.data as BaseResponse;
+    } catch (error) {
+        console.log("Error while deleting user info:", error);
+        return {
+            ok: false
+        } as BaseResponse;
     }
 
 }

@@ -199,6 +199,7 @@ function HomePage() {
                     <button onClick={ logoutFunction } className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200">
                         Logout
                     </button>
+                    <p></p>
                     <button onClick={ () => { updateInfo(user, ts); } } className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200">
                         Save preferences
                     </button>

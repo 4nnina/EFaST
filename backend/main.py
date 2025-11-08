@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
-from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, HTML_Placeholder
+from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, RegisterInput, HTML_Placeholder
 from logs.logConfig import logger
 import os, uvicorn, dotenv
 from database.manager import cout
@@ -54,9 +54,32 @@ async def login(data: LoginInput):
     )
 
 
-@app.get("/info", summary="Fetch user info and preferences", tags=["Get user info"])
+@app.post("/register", summary="Register new user", tags=["Register"])
+async def register(data: RegisterInput):
+    result: bool = DBManager.registerUser(data.user, data.passw, data.maxUnd, data.maxImp)
+    if result:
+        return JSONResponse(
+            status_code=200,
+            content={"ok": True}
+        )
+    return JSONResponse(
+        status_code=409,
+        content={"ok": False}
+    )
+
+
+@app.get("/info", summary="Fetch user preferences", tags=["Get user info"])
 async def fetchInfo(user: str):
     result: dict = DBManager.getInfoFromUser(user)
+    return JSONResponse(
+        status_code=200,
+        content=result
+    )
+
+
+@app.get("/users", summary="Fetch all users except admin", tags=["Get all users info"])
+async def fetchUsers():
+    result: list[dict] = DBManager.getAllUsers()
     return JSONResponse(
         status_code=200,
         content=result
