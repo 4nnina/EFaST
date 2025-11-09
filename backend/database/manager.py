@@ -139,8 +139,8 @@ class Query:
                     slot.c["peso"]
                 ).order_by(
                     case(
-                        [(slot.c["peso"] == 'not', 0),
-                        (slot.c["peso"] == 'NOT', 1)],
+                        (slot.c["peso"] == 'not', 0),
+                        (slot.c["peso"] == 'NOT', 1),
                         else_=2
                     )
                 )
@@ -157,6 +157,65 @@ class Query:
                 maxnot=maxnot
             )
             conn.execute(query)
+
+    @staticmethod
+    def deleteUserPreferencesFromId(userId: int) -> int:
+        with engine.begin() as conn:
+            query = delete(slot).where(
+                slot.c["id"] == userId
+            )
+            return conn.execute(query).rowcount
+
+    @staticmethod
+    def deleteUserInfoFromId(userId: int) -> None:
+        with engine.begin() as conn:
+            query = delete(users).where(
+                users.c["id"] == userId
+            )
+            conn.execute(query)
+
+    @staticmethod
+    def updateUserInfo(userId: int, user: str, passw: str | None, maxnot: int, maxNOT: int):
+        with engine.begin() as conn:
+            if user!="X" and passw:
+                query = update(users).where(
+                    users.c["id"] == userId
+                ).values(
+                    username=user,
+                    password=passw,
+                    maximp=maxNOT,
+                    maxnot=maxnot
+                )
+            elif user=="X" and passw:
+                query = update(users).where(
+                    users.c["id"] == userId
+                ).values(
+                    maximp=maxNOT,
+                    maxnot=maxnot
+                )
+            elif user!="X" and not passw:
+                query = update(users).where(
+                    users.c["id"] == userId
+                ).values(
+                    username=user,
+                    maximp=maxNOT,
+                    maxnot=maxnot
+                )
+            else:
+                query = update(users).where(
+                    users.c["id"] == userId
+                ).values(
+                    maximp=maxNOT,
+                    maxnot=maxnot
+                )
+            conn.execute(query)
+
+    def isNamePresent(user: str) -> int:
+        with engine.connect() as conn:
+            query = select(users).where(
+                users.c["username"] == user
+            )
+            return conn.execute(query).rowcount
 
 
 # debug printer on file stdout

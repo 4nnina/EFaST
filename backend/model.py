@@ -27,11 +27,21 @@ class UpdateInput(BaseModel):
     user: str
     timeslots: list[Timeslot]
 
-class RegisterInput(BaseModel):
+class RegisterInfo(BaseModel):
     user: str
     passw: str
     maxUnd: int
     maxImp: int
+
+class BaseUserInfo(BaseModel):
+    id: int
+    user: str
+    passw: str
+    maxUnd: int
+    maxImp: int
+
+class DeleteInput(BaseModel):
+    id: int
 
 
 class DBManager:
@@ -106,23 +116,7 @@ class DBManager:
     """
     Future edit constraints
     # check if user preferences are compatible with maxnot and maxNOT
-        count: list[dict] = Query.getMaxCountFromUser(user["id"])
-        max_n: int = 0
-        max_N: int = 0
-
-        if len(count)==1:
-            if count[0]["peso"]=="not":
-                max_n = count[0]["count"]
-            else:
-                max_N = count[0]["count"]
-        else:
-            max_n = count[0]["count"]
-            max_N = count[1]["count"]
-
-        if max_n < maxnot:
-            issues.append(f"'Better Not' value for {name} is understimated.")
-        if max_N < maxNOT:
-            issues.append(f"'Impossible' value for {name} is understimated.")
+        
 
     """
 
@@ -133,6 +127,51 @@ class DBManager:
             return False
         encpsw: str = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         Query.insertUser(name, encpsw, maxnot, maxNOT)
+        return True
+    
+    @staticmethod
+    def deleteUser(userId: int) -> bool:
+        if userId==0:
+            return False
+        if Query.deleteUserPreferencesFromId(userId) > 0:
+            FAST.updateProfessorsConstraint()
+        Query.deleteUserInfoFromId(userId)
+        return True
+    
+    @staticmethod
+    def updateUserInfo(userId: int, user: str, password: str, maxnot: int, maxNOT: int) -> bool:
+
+        if user=="admin" or maxnot<0 or maxNOT<0:
+            return False
+        
+        if user!="X":
+            if Query.isNamePresent(user) == 1:
+                return False
+
+        count: list[dict] = list(Query.getMaxCountFromUser(userId))
+        max_n: int = 0
+        max_N: int = 0
+
+        if len(count)==1:
+            if count[0]["peso"]=="not":
+                max_n = count[0]["count"]
+            else:
+                max_N = count[0]["count"]
+        elif len(count)==2:
+            max_n = count[0]["count"]
+            max_N = count[1]["count"]  
+
+        # cout(f"{max_n}>{maxnot} or {max_N}>{maxNOT}")
+
+        if max_n > maxnot or max_N > maxNOT:
+            return False
+
+        if password!="X":
+            encpsw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        else:
+            encpsw = None
+
+        Query.updateUserInfo(userId, user, encpsw, int(maxnot), int(maxNOT))
         return True
 
 

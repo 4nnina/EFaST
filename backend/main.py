@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
-from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, RegisterInput, HTML_Placeholder
+from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, HTML_Placeholder
 from logs.logConfig import logger
 import os, uvicorn, dotenv
 from database.manager import cout
@@ -55,7 +55,7 @@ async def login(data: LoginInput):
 
 
 @app.post("/register", summary="Register new user", tags=["Register"])
-async def register(data: RegisterInput):
+async def register(data: RegisterInfo):
     result: bool = DBManager.registerUser(data.user, data.passw, data.maxUnd, data.maxImp)
     if result:
         return JSONResponse(
@@ -68,7 +68,7 @@ async def register(data: RegisterInput):
     )
 
 
-@app.get("/info", summary="Fetch user preferences", tags=["Get user info"])
+@app.get("/info", summary="Fetch user preferences from user name", tags=["Get user preferences"])
 async def fetchInfo(user: str):
     result: dict = DBManager.getInfoFromUser(user)
     return JSONResponse(
@@ -77,7 +77,7 @@ async def fetchInfo(user: str):
     )
 
 
-@app.get("/users", summary="Fetch all users except admin", tags=["Get all users info"])
+@app.get("/users", summary="Fetch all users base info, except admin", tags=["Get all users info"])
 async def fetchUsers():
     result: list[dict] = DBManager.getAllUsers()
     return JSONResponse(
@@ -86,7 +86,7 @@ async def fetchUsers():
     )
 
 
-@app.put("/update", summary="Update user info and preferences", tags=["Update user info"])
+@app.put("/update", summary="Update user preferences", tags=["Update user preferences"])
 async def updateInfo(data: UpdateInput):
     result: dict = DBManager.getInfoFromUser(data.user)
     if not result:
@@ -100,7 +100,35 @@ async def updateInfo(data: UpdateInput):
     )
 
 
-@app.get("/{everyPath:path}", summary="Homepage", tags=["Homepage"], response_class=HTMLResponse)
+@app.delete("/remove", summary="Delete user instance and his/her preferences", tags=["Delete all of user"])
+async def deleteInfo(data: DeleteInput):
+    result: bool = DBManager.deleteUser(data.id)
+    if result:
+        return JSONResponse(
+            status_code=200,
+            content={"ok": True}
+        )
+    return JSONResponse(
+        status_code=409,
+        content={"ok": False}
+    )
+
+
+@app.put("/edit", summary="Edit user base info", tags=["Update user info"])
+async def updateBaseInfo(data: BaseUserInfo):
+    result: bool = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
+    if result:
+        return JSONResponse(
+            status_code=200,
+            content={"ok": True}
+        )
+    return JSONResponse(
+        status_code=409,
+        content={"ok": False}
+    )
+
+
+@app.get("/{everyPath:path}", summary="Main homepage HTML template", tags=["Homepage"], response_class=HTMLResponse)
 async def catchRoutes(everyPath: str):
     return HTMLResponse(content=HTML_Placeholder())
 

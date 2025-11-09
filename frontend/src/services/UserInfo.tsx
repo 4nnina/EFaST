@@ -87,11 +87,31 @@ export async function registerUser(name: string, password: string, mxUnd: number
 
 }
 
-export async function deleteUser(name: string) {
+export async function deleteUser(userId: number) {
 
     try {
         const response = await axios.delete("http://localhost:5000/remove", {
-            data: {user: name}
+            data: {id: userId}
+        });
+        return response.data as BaseResponse;
+    } catch (error) {
+        console.log("Error while deleting user info:", error);
+        return {
+            ok: false
+        } as BaseResponse;
+    }
+
+}
+
+export async function editUser(userId: number, name: string, password: string, mxUnd: number, mxImp: number) {
+
+    try {
+        const response = await axios.put("http://localhost:5000/edit", {
+            id: userId,
+            user: name,
+            passw: password,
+            maxUnd: mxUnd,
+            maxImp: mxImp
         });
         return response.data as BaseResponse;
     } catch (error) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUsers } from "../services/UserInfo";
+import { deleteUser, editUser, getUsers } from "../services/UserInfo";
 import type { User } from "../services/UserInfo";
 import EditPopup from "./EditPopup"; 
 
@@ -14,14 +14,16 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
   const [displayedData, setDisplayedData] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null); // stato popup
 
+  // --- FETCH iniziale ---
   useEffect(() => {
     async function fetchUsers() {
-      const data: User[] = await getUsers();
-      setData(data);
+      const users: User[] = await getUsers();
+      setData(users);
     }
     fetchUsers();
   }, []);
 
+  // --- FILTRAGGIO + ORDINAMENTO ---
   useEffect(() => {
     const handler = setTimeout(() => {
       let filtered = [...data];
@@ -50,35 +52,56 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
     return () => clearTimeout(handler);
   }, [data, orderBy, searchField, searchValue]);
 
+  // --- FUNZIONI DI CONTROLLO ---
   function handleCalendar(item: User) {
-    window.location.href = "/preferences/" + item.name;
+    window.open(`${window.location.origin}/preferences/${item.name}`, "_blank");
   }
 
   function handleEdit(item: User) {
     setEditingUser(item); 
   }
 
-  // funzione per chiudere popup e aggiornare dati
-  function closePopup(
-    updatedUser?: { name: string; mxUnd: number; mxImp: number },
-    deleted?: boolean
-  ) {
+  // 🔹 Quando l’utente salva le modifiche
+  function handleEditUser(updatedUser: { id: number; name?: string; mxUnd: number; mxImp: number; password?: string }) {
+    
+    async function removeUser(){
 
-    if (editingUser) {
+      const response = await editUser(updatedUser.id, updatedUser.name || "X", updatedUser.password || "X", updatedUser.mxUnd, updatedUser.mxImp)
+      if (response.ok) {
+        alert("User info and preferences have been modified succesfully")
+        window.location.href = "/dashboard";
+      } 
+      alert("Something went wrong while editing userId " + updatedUser.id);
 
-      if (deleted) {
-
-        // delete case (...)
-        
-      } else if (updatedUser) {
-
-        // edit case (...)
-
-      }
     }
 
+    removeUser();
     setEditingUser(null);
 
+  }
+
+  // 🔹 Quando l’utente elimina
+  async function handleDeleteUser(userId: number) {
+
+    async function removeUser(){
+
+      const response = await deleteUser(userId)
+      if (response.ok) {
+        alert("User info and preferences have been deleted succesfully")
+        window.location.href = "/dashboard";
+      } 
+      alert("Something went wrong while deleting userId " + userId);
+
+    }
+
+    removeUser();
+    setEditingUser(null);
+
+  }
+
+  // 🔹 Quando chiude senza fare nulla
+  function handleClosePopup() {
+    setEditingUser(null);
   }
 
   return (
@@ -135,7 +158,12 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
       </div>
 
       {editingUser && (
-        <EditPopup user={editingUser} close={closePopup} />
+        <EditPopup
+          user={editingUser}
+          onEdit={handleEditUser}
+          onDelete={handleDeleteUser}
+          onClose={handleClosePopup}
+        />
       )}
     </div>
   );
