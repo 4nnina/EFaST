@@ -778,3 +778,4 @@ prof_id,week_day,hour_begin,hour_end,level,note,constraint
 88,Thu,16:30,17:30,impossible,,"NOT (Thu, [16:30,17:30])"
 88,Thu,17:30,18:30,undesired,,"not (Thu, [17:30,18:30])"
 88,Thu,18:30,19:30,undesired,,"not (Thu, [18:30,19:30])"
+90,Wed,13:30,14:30,undesired,,"not (Wed, [13:30,14:30])"

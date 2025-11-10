@@ -113,13 +113,6 @@ class DBManager:
             })
         return table
     
-    """
-    Future edit constraints
-    # check if user preferences are compatible with maxnot and maxNOT
-        
-
-    """
-
     @staticmethod
     def registerUser(name: str, password: str, maxnot: int, maxNOT: int) -> bool:
         user: dict = Query.getInfoFromUser(name)
@@ -139,14 +132,17 @@ class DBManager:
         return True
     
     @staticmethod
-    def updateUserInfo(userId: int, user: str, password: str, maxnot: int, maxNOT: int) -> bool:
+    def updateUserInfo(userId: int, user: str, password: str, maxnot: int, maxNOT: int) -> list:
 
-        if user=="admin" or maxnot<0 or maxNOT<0:
-            return False
-        
+        issues: list[str] = []
+
+        if user=="admin":
+            issues.append("Admin is not editable")
+        if maxnot<0 or maxNOT<0:
+            issues.append("Max input values must be integers")
         if user!="X":
             if Query.isNamePresent(user) == 1:
-                return False
+                issues.append(f"Username {user} is already taken")
 
         count: list[dict] = list(Query.getMaxCountFromUser(userId))
         max_n: int = 0
@@ -164,15 +160,18 @@ class DBManager:
         # cout(f"{max_n}>{maxnot} or {max_N}>{maxNOT}")
 
         if max_n > maxnot or max_N > maxNOT:
-            return False
+            issues.append(f"Max input values are lower than actual preferences of userId {userId}")
 
+        if issues:
+            return issues
+        
         if password!="X":
             encpsw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         else:
             encpsw = None
 
         Query.updateUserInfo(userId, user, encpsw, int(maxnot), int(maxNOT))
-        return True
+        return []
 
 
 class FAST:

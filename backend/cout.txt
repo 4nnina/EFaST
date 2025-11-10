@@ -1,5 +1,14 @@
 .
-0<8 or 0<7
-8<3 or 2<10
-8>2 or 2>10
-8>8 or 2>4
+['Max input values are lower than actual preferences of prof7']
+['Max input values are lower than actual preferences of userId 5']
+['Max input values are lower than actual preferences of userId 5']
+[]
+[]
+['Max input values are lower than actual preferences of userId 3']
+['Max input values are lower than actual preferences of userId 3']
+['Max input values are lower than actual preferences of userId 3']
+['Max input values are lower than actual preferences of userId 3']
+90
+[]
+['Max input values are lower than actual preferences of userId 90']
+[]

@@ -70,8 +70,13 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
       if (response.ok) {
         alert("User info and preferences have been modified succesfully")
         window.location.href = "/dashboard";
-      } 
-      alert("Something went wrong while editing userId " + updatedUser.id);
+      } else {
+        const issues = response.issues || []
+        alert(
+          "❌ Something went wrong while editing user ID " + updatedUser.id + "." +
+          "\n\nFound issues:\n- " + issues.join("\n- ")
+        );
+      }
 
     }
 

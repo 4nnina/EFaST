@@ -116,15 +116,16 @@ async def deleteInfo(data: DeleteInput):
 
 @app.put("/edit", summary="Edit user base info", tags=["Update user info"])
 async def updateBaseInfo(data: BaseUserInfo):
-    result: bool = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
-    if result:
+    result: list[str] = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
+    cout(result)
+    if not result:
         return JSONResponse(
             status_code=200,
             content={"ok": True}
         )
     return JSONResponse(
-        status_code=409,
-        content={"ok": False}
+        status_code=200,
+        content={"ok": False, "issues": result}
     )
 
 

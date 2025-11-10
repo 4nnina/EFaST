@@ -21,7 +21,8 @@ export interface User {
 }
 
 interface BaseResponse {
-    ok: boolean
+    ok: boolean,
+    issues?: string[]
 }
 
 export async function getInfo(user: string) {
@@ -73,7 +74,7 @@ export async function registerUser(name: string, password: string, mxUnd: number
     try {
         const response = await axios.post("http://localhost:5000/register", {
             user: name,
-            pass: password,
+            passw: password,
             maxUnd: mxUnd,
             maxImp: mxImp
         });
