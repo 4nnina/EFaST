@@ -45,6 +45,7 @@ To verify, run the following commands:
    cd ../frontend
    npm install
    ```
+   <br><br>
 
 ## 🚀 Running the Application
 
