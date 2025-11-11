@@ -32,11 +32,12 @@ To verify, run the following commands:
 
    ```bash
    cd backend
-   python3 -m venv venv
+   python3 -m venv venv                     
    source venv/bin/activate                 # On Windows: venv\Scripts\activate
    pip install --upgrade pip
    pip install -r requirements.txt
    mv .env.example .env                     # Then modify .env variables
+   deactivate
    ```
 
 3. Set up the Node.js frontend environment and installing the libraries
