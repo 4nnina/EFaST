@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Auth from "../services/Auth";
 import getToken from "../services/Token";
 import Timetable from "../components/Timetable";
-import { getInfo, updateInfo} from "../services/UserInfo";
+import { getInfo, updateInfo} from "../services/UserAPI";
 import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 

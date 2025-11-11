@@ -1,12 +1,7 @@
 import axios from "axios";
+import type { Auth } from "../types/UserTypes";
 
-interface User {
-    auth: boolean,
-    user?: string,
-    error?: string
-}
-
-async function getToken(): Promise<User | null> {
+async function getToken(): Promise<Auth | null> {
 
     const token = localStorage.getItem("FastToken");
 
@@ -14,7 +9,7 @@ async function getToken(): Promise<User | null> {
 
     try {
         const response = await axios.post("http://localhost:5000/auth", {token});
-        return response.data as User;
+        return response.data as Auth;
     } catch (error) {
         console.log("Error during token authentication:", error);
         return null;

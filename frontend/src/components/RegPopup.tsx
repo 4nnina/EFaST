@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-
-interface RegisterPopupProps {
-  close: (newUser?: { name: string; password: string; mxUnd: number; mxImp: number }) => void;
-}
+import type { RegisterPopupProps } from "../types/PopupTypes";
 
 function RegPopup({ close }: RegisterPopupProps) {
   const [name, setName] = useState("");

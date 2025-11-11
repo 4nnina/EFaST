@@ -20,7 +20,7 @@ function Auth({ children }: React.PropsWithChildren) {
     
     if (user === undefined) return <Loading />
     if (user === null || user != "admin") {
-        window.location.href = 'login';
+        window.location.href = '/login';
         return;
     }
     return <>{children}</>;

@@ -1,29 +1,5 @@
 import axios from "axios";
-
-interface Timeslot {
-    day: string,
-    slot: [string, string], 
-    weight: string
-}
-
-interface Info {
-    id: number,
-    maxImp: number,
-    maxNot: number,
-    timeslots: Timeslot[]
-}
-
-export interface User {
-    id: number,
-    name: string,
-    mxUnd: number,
-    mxImp: number
-}
-
-interface BaseResponse {
-    ok: boolean,
-    issues?: string[]
-}
+import type { BaseResponse, Info, User } from "../types/UserTypes";
 
 export async function getInfo(user: string) {
 

@@ -26,13 +26,13 @@ app.add_middleware(
 async def authenticate(data: TokenInput):
     result: tuple[bool, str] = DBManager.verifyAuthentication(data.token)
     if result[0]:
-        logger.info(f"User {result[1]} is authenticated now.")
+        logger.info(f"[AUTH] User {result[1]} is authenticated now.")
         return JSONResponse(
             status_code=200,
             content={"auth": True, "user": result[1]}
         )
     else:
-        logger.warning(f"Session token {data.token} is invalid or expired.")
+        logger.warning(f"[AUTH] Session token {data.token} invalid: '{result[1]}'.")
         return JSONResponse(
             status_code=401,
             content={"auth": False, "error": result[1]}
@@ -42,12 +42,12 @@ async def authenticate(data: TokenInput):
 @app.post("/login", summary="User or admin login", tags=["Login"])
 async def login(data: LoginInput):
     if DBManager.verifyCredentials(data.username, data.password):
-        logger.info(f"User {data.username} just logged succesfully.")
+        logger.info(f"[LOGIN] User {data.username} just logged succesfully.")
         return JSONResponse(
             status_code=200,
             content={"user": data.username, "token": DBManager.makeTokenSession(data.username)}
         )
-    logger.warning(f"User {data.username} failed to log in.")
+    logger.warning(f"[LOGIN] User {data.username} failed to log in.")
     return JSONResponse(
         status_code=401,                # unauthorized error
         content={"error": "Invalid credentials"}
@@ -58,10 +58,12 @@ async def login(data: LoginInput):
 async def register(data: RegisterInfo):
     result: bool = DBManager.registerUser(data.user, data.passw, data.maxUnd, data.maxImp)
     if result:
+        logger.info(f"[REGISTER] A new user ({data.user}) was registered succesfully.")
         return JSONResponse(
             status_code=200,
             content={"ok": True}
         )
+    logger.warning(f"[REGISTER] A new user ({data.user}) failed to register.")
     return JSONResponse(
         status_code=409,
         content={"ok": False}
@@ -71,6 +73,7 @@ async def register(data: RegisterInfo):
 @app.get("/info", summary="Fetch user preferences from user name", tags=["Get user preferences"])
 async def fetchInfo(user: str):
     result: dict = DBManager.getInfoFromUser(user)
+    logger.info(f"[INFO] Fetching user ({user}) preferences.")
     return JSONResponse(
         status_code=200,
         content=result
@@ -80,6 +83,7 @@ async def fetchInfo(user: str):
 @app.get("/users", summary="Fetch all users base info, except admin", tags=["Get all users info"])
 async def fetchUsers():
     result: list[dict] = DBManager.getAllUsers()
+    logger.info("[USERS] Fetching all user basic info.")
     return JSONResponse(
         status_code=200,
         content=result
@@ -90,10 +94,10 @@ async def fetchUsers():
 async def updateInfo(data: UpdateInput):
     result: dict = DBManager.getInfoFromUser(data.user)
     if not result:
-        logger.info(f"User {data.user} is absent.")
+        logger.info(f"[UPDATE] User {data.user} is absent.")
     DBManager.updateTimeslotsFromUserId(result["id"], data.timeslots)
     FAST.updateProfessorsConstraint()
-    logger.info(f"Timeslots of user {data.user} were update succesfully.")
+    logger.warning(f"[UPDATE] Timeslots of user {data.user} were updated succesfully.")
     return JSONResponse(
         status_code=200,
         content={"message": "ok"}
@@ -104,10 +108,12 @@ async def updateInfo(data: UpdateInput):
 async def deleteInfo(data: DeleteInput):
     result: bool = DBManager.deleteUser(data.id)
     if result:
+        logger.info(f"[REMOVE] User (id {data.id}) and his/her preferences were deleted succesfully.")
         return JSONResponse(
             status_code=200,
             content={"ok": True}
         )
+    logger.error("[REMOVE] Impossible to remove 'admin'.")
     return JSONResponse(
         status_code=409,
         content={"ok": False}
@@ -117,12 +123,13 @@ async def deleteInfo(data: DeleteInput):
 @app.put("/edit", summary="Edit user base info", tags=["Update user info"])
 async def updateBaseInfo(data: BaseUserInfo):
     result: list[str] = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
-    cout(result)
     if not result:
+        logger.info(f"[EDIT] Base info for {data.user} was updated succesfully.")
         return JSONResponse(
             status_code=200,
             content={"ok": True}
         )
+    logger.warning(f"[EDIT] Impossible to edit base info for {data.user}, here's why: { ', '.join(result) }")
     return JSONResponse(
         status_code=200,
         content={"ok": False, "issues": result}
@@ -131,6 +138,7 @@ async def updateBaseInfo(data: BaseUserInfo):
 
 @app.get("/{everyPath:path}", summary="Main homepage HTML template", tags=["Homepage"], response_class=HTMLResponse)
 async def catchRoutes(everyPath: str):
+    logger.debug("[HOMEPAGE] Route catcher, someone wants to see backend documentation.")
     return HTMLResponse(content=HTML_Placeholder())
 
 

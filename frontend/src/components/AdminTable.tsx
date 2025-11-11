@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
-import { deleteUser, editUser, getUsers } from "../services/UserInfo";
-import type { User } from "../services/UserInfo";
+import { deleteUser, editUser, getUsers } from "../services/UserAPI";
 import EditPopup from "./EditPopup"; 
-
-interface AdminTableProps {
-  orderBy: keyof User;
-  searchField: keyof User;
-  searchValue: string;
-}
+import type { User } from "../types/UserTypes";
+import type { AdminTableProps } from "../types/PopupTypes";
 
 function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
   const [data, setData] = useState<User[]>([]);

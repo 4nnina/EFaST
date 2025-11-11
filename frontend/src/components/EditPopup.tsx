@@ -1,16 +1,5 @@
 import { useState, useEffect } from "react";
-
-interface EditPopupProps {
-  user: {
-    id: number;
-    name: string;
-    mxUnd: number;
-    mxImp: number;
-  };
-  onEdit: (updatedUser: { id: number; name: string; mxUnd: number; mxImp: number; password: string }) => void;
-  onDelete: (userId: number) => void;
-  onClose: () => void;
-}
+import type { EditPopupProps } from "../types/PopupTypes";
 
 function EditPopup({ user, onEdit, onDelete, onClose }: EditPopupProps) {
   const [name, setName] = useState("");

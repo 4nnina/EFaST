@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from database.manager import Query, cout
+from logs.logConfig import logger
 import bcrypt, datetime as dt
 import secrets, os, pandas as pd
 
@@ -176,6 +177,8 @@ class DBManager:
 
 class FAST:
 
+    # FOR ME: valutare di accorpare orari consecutivi
+
     @staticmethod
     def updateProfessorsConstraint() -> None:
         csvFile: str = "FAST/dataset/university/constraint_professors.csv"
@@ -193,3 +196,4 @@ class FAST:
             }
             dataFrame = pd.concat([dataFrame, pd.DataFrame([nts])], ignore_index=True)
         dataFrame.to_csv(csvFile, index=False)
+        logger.info(f"[FAST] File '{csvFile}' was updated succesfully.")

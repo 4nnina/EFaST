@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import AdminAuth from "../services/AdminAuth";
 import Timetable from "../components/Timetable";
-import { getInfo, updateInfo} from "../services/UserInfo";
+import { getInfo, updateInfo} from "../services/UserAPI";
 import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 import { useParams } from "react-router-dom";
@@ -19,7 +19,11 @@ function PrefPage() {
     const params = useParams();
 
     useEffect(() => {
+
       setUser(params["*"] || "Nothing");
+
+      
+
     }, []);
 
     useEffect(() => {
@@ -35,6 +39,10 @@ function PrefPage() {
 
                 setMaxImp(info.maxImp - NOTCount);
                 setMaxNot(info.maxNot - notCount);
+
+                if (notCount == 0){
+                  window.location.href = "/dashboard";
+                }
 
                 setTs(info);
                 

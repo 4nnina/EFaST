@@ -2,7 +2,7 @@ import { useState } from "react";
 import AdminAuth from "../services/AdminAuth";
 import AdminTable from "../components/AdminTable";
 import RegisterPopup from "../components/RegPopup";
-import { registerUser } from "../services/UserInfo";
+import { registerUser } from "../services/UserAPI";
 
 function AdminPage() {
   // 👇 tipi validi solo per i campi che vuoi usare nei filtri
