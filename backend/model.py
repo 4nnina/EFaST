@@ -177,7 +177,7 @@ class DBManager:
 
 class FAST:
 
-    # FOR ME: valutare di accorpare orari consecutivi
+    # FOR ME: valutare di accorpare orari consecutivi (?)
 
     @staticmethod
     def updateProfessorsConstraint() -> None:
@@ -192,7 +192,7 @@ class FAST:
                 "hour_end": str(ts["ora_fine"]),
                 "level": "undesired" if ts["peso"]=="not" else "impossible",
                 "note": "",
-                "constraint": f"{ts['peso']} ({ts['giorno']}, [{ts['ora_inizio']},{ts['ora_fine']}])"
+                "constraint": f"{ts['peso']} ({ts['giorno']}, [{ts['ora_inizio']}, {ts['ora_fine']}])"
             }
             dataFrame = pd.concat([dataFrame, pd.DataFrame([nts])], ignore_index=True)
         dataFrame.to_csv(csvFile, index=False)

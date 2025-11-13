@@ -1,4 +1,4 @@
-import getToken from "./Token";
+import getToken from "./TokenAPI";
 import { useState, useEffect } from "react";
 import Loading from "../components/Loading";
 

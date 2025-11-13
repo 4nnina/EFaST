@@ -11,7 +11,6 @@ Thumbs.db
 
 # Logs
 *.log
-logs/
 log/
 *.pid
 *.seed
@@ -58,6 +57,7 @@ dist/
 *.sqlite
 *.sqlite3
 !backend/database/db.sqlite3
+backend/cout.txt
 
 # Migrations
 migrations/

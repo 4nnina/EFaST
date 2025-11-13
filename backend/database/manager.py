@@ -220,13 +220,7 @@ class Query:
 
 # debug printer on file stdout
 def cout(obj: any):
-    with open("cout.txt", "a") as file:
+    with open("cout.txt", "w") as file:
         file.write(str(obj) + "\n")
 
-'''
-with engine.connect() as conn:
-    conn.execute(
-        update(users).values(password=bcrypt.hashpw("ciaone".encode("utf-8"), bcrypt.gensalt()))
-    )
-    conn.commit()
-'''
+

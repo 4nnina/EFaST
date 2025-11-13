@@ -1,0 +1,178 @@
+{
+    "professors": [
+        {
+            "name": "71",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "41",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "31",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "86",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "30",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "23",
+            "fairness": -1.0,
+            "percentage": 83.0
+        },
+        {
+            "name": "5",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "1",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "44",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "4",
+            "fairness": -1.5,
+            "percentage": 66.0
+        },
+        {
+            "name": "55",
+            "fairness": -0.5,
+            "percentage": 91.0
+        },
+        {
+            "name": "88",
+            "fairness": -3000.0,
+            "percentage": 0.0
+        },
+        {
+            "name": "54",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "74",
+            "fairness": -0.5,
+            "percentage": 91.0
+        },
+        {
+            "name": "25",
+            "fairness": -1.0,
+            "percentage": 83.0
+        },
+        {
+            "name": "51",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "57",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "32",
+            "fairness": -0.5,
+            "percentage": 91.0
+        },
+        {
+            "name": "112",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "46",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "43",
+            "fairness": -1.0,
+            "percentage": 83.0
+        },
+        {
+            "name": "66",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "90",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "96",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "106",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "33",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "35",
+            "fairness": -0.5,
+            "percentage": 91.0
+        },
+        {
+            "name": "85",
+            "fairness": -1.0,
+            "percentage": 60.0
+        },
+        {
+            "name": "93",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "68",
+            "fairness": 0.0,
+            "percentage": 100.0
+        },
+        {
+            "name": "50",
+            "fairness": -1.5,
+            "percentage": 75.0
+        },
+        {
+            "name": "83",
+            "fairness": 0.0,
+            "percentage": 100.0
+        }
+    ],
+    "degrees": {
+        "Fairness Score year 1 Bio": -1.3333333333333333,
+        "Fairness Score year 2 Bio": -1.4666666666666668,
+        "Fairness Score year 3 Bio": -1.6833333333333331,
+        "Fairness Score year 1 Inf": -1.7904761904761903,
+        "Fairness Score year 2 Inf": -1.55,
+        "Fairness Score year 3 Inf": -1.640909090909091,
+        "Fairness Score year 1 BioInf": -1.6578947368421053,
+        "Fairness Score year 2 BioInf": -1.3333333333333335,
+        "Fairness Score year 3 BioInf": -1.5
+    },
+    "final_fairness": -47.790955371383006,
+    "Fairness < 100%": 11,
+    "Worst Percentage": 0.0
+}

@@ -8,6 +8,7 @@ from global_sol.utils_global import perturbate
 from global_sol.data_classes_global import GlobalUniversity
 import json
 
+
 def performSaUI(curr_sol, paretoSet, paretoFront, initialTemp, finalTemp, alpha, maxPerturbation, heuristic = False):  #new
     temperature = initialTemp
     c = 0
@@ -58,14 +59,13 @@ def getBestSolUI(curr_sol, initialTemp, finalTemp, alpha, maxPerturbation, heuri
     return best_sol
 
 def main():
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     dataset_path = os.path.join(current_dir, '..', 'dataset', 'university')
     csv_path = os.path.join(dataset_path, 'lecture_timeslots.csv')
 
-    possible_paths = [
-        os.path.join(current_dir, '..', 'dataset', 'university', 'lecture_timeslots.csv')
-    ]
-    
+    possible_paths = [csv_path]
+
     csv_path = None
     for path in possible_paths:
         if os.path.exists(path):
@@ -205,7 +205,8 @@ def main():
 
         base_dir = os.path.join(os.getcwd())
         specific_folder = "university_schedules_stats"
-        output_dir = os.path.join(base_dir, '..', specific_folder)
+        # MODIFIED PATH
+        output_dir = os.path.join(base_dir, 'FAST', specific_folder)
 
 
         try:

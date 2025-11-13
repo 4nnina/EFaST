@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Auth from "../services/Auth";
-import getToken from "../services/Token";
+import getToken from "../services/TokenAPI";
 import Timetable from "../components/Timetable";
 import { getInfo, updateInfo} from "../services/UserAPI";
 import Loading from "../components/Loading";

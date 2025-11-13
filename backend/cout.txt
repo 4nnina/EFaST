@@ -1,15 +1,1 @@
-.
-['Max input values are lower than actual preferences of prof7']
-['Max input values are lower than actual preferences of userId 5']
-['Max input values are lower than actual preferences of userId 5']
-[]
-[]
-['Max input values are lower than actual preferences of userId 3']
-['Max input values are lower than actual preferences of userId 3']
-['Max input values are lower than actual preferences of userId 3']
-['Max input values are lower than actual preferences of userId 3']
-90
-[]
-['Max input values are lower than actual preferences of userId 90']
-[]
-90
+3

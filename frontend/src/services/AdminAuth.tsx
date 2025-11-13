@@ -1,4 +1,4 @@
-import getToken from "./Token";
+import getToken from "./TokenAPI";
 import { useState, useEffect } from "react";
 import Loading from "../components/Loading";
 
@@ -18,8 +18,8 @@ function Auth({ children }: React.PropsWithChildren) {
         fetchToken();
     }, []);
     
-    if (user === undefined) return <Loading />
-    if (user === null || user != "admin") {
+    if (user === undefined) return <Loading /> 
+        if (user === null || user != "admin") {
         window.location.href = '/login';
         return;
     }

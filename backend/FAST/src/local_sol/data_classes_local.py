@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(".."))
 current_dir = os.getcwd()
 src_dir = os.path.dirname(current_dir)
 parent_dir = os.path.dirname(src_dir)   
-dataset_path = os.path.join(parent_dir, 'FAST-UI/dataset/')     # MODIFIED PATH
+dataset_path = os.path.join(parent_dir, 'FAST-APP/backend/FAST/dataset/')     # MODIFIED PATH
 
 dataset_timeslot_file = os.path.join(dataset_path,'university/lecture_timeslots.csv')
 data_prof_cons_file = os.path.join(dataset_path,'university/constraint_professors.csv')

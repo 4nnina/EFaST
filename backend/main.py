@@ -1,10 +1,12 @@
-from fastapi import FastAPI
+import signal
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, HTML_Placeholder
 from logs.logConfig import logger
-import os, uvicorn, dotenv
+import os, uvicorn, dotenv, json
 from database.manager import cout
+from glob import glob
 
 
 app: FastAPI = FastAPI(
@@ -133,6 +135,96 @@ async def updateBaseInfo(data: BaseUserInfo):
     return JSONResponse(
         status_code=200,
         content={"ok": False, "issues": result}
+    )
+
+
+def run_long_optimization():
+
+    import subprocess, shutil, sys
+
+    output_dir = "FAST/university_schedules_stats/"
+    main_script_path = os.path.abspath("FAST/src/main.py")
+
+    shutil.rmtree(output_dir, ignore_errors=True)
+    os.makedirs(output_dir, exist_ok=True)
+
+    bgProcess = subprocess.Popen(
+        [sys.executable, main_script_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=os.environ.copy()
+    )
+    os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
+    stdout, stderr = bgProcess.communicate(timeout=int(os.environ.get("FAST_TIMEOUT", 300)))
+
+
+@app.post("/runOptimization", summary="[complete]", tags=["[complete]"])
+async def runOptimization(background_tasks: BackgroundTasks):
+    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
+    if bgPid!=-1:
+        try:
+            os.kill(bgPid, 0)
+            os.kill(bgPid, signal.SIGKILL)
+        except OSError:
+            pass
+        del os.environ["FAST_SUBPROCESS"]
+    background_tasks.add_task(run_long_optimization)
+    return JSONResponse(
+        status_code=200,
+        content={"status": "started", "message": "Optimization running in background"}
+    )
+
+
+@app.post("/stopOptimization", summary="[complete]", tags=["[complete]"])
+async def stopOptimization(background_tasks: BackgroundTasks):
+    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
+    if bgPid!=-1:
+        try:
+            os.kill(bgPid, 0)
+            os.kill(bgPid, signal.SIGKILL)
+        except OSError:
+            pass
+        del os.environ["FAST_SUBPROCESS"]
+        return JSONResponse(
+            status_code=200,
+            content={"status": "stopped", "message": "Old optimization was stopped"}
+        )
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok", "message": "There was no optimization to stop"}
+    )
+
+
+@app.get("/pstatus")
+async def pstatus():
+    bgProcess = int(os.environ.get("FAST_SUBPROCESS", -1))
+    return JSONResponse(
+        status_code=200,
+        content={"running": bgProcess!=-1}
+    )
+
+
+@app.get("/getJsonFiles", summary="[complete]", tags=["[complete]"])
+async def getJsonFiles():
+    output_dir: str = "FAST/university_schedules_stats/"
+    files: list = sorted(glob(os.path.join(output_dir, 'fairness_data_*.json')))
+    result: list = []
+    for file in files:
+        content: dict | None = None
+        try:
+            with open(file, 'r') as jf:
+                content = json.load(jf)
+        except Exception as e:
+            content = None
+        result.append({
+            'filename': os.path.basename(file),
+            'content': content,
+            'timestamp': os.path.getmtime(file)
+        })
+    return JSONResponse(
+        status_code=200,
+        content=result
     )
 
 

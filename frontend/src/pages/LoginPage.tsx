@@ -3,8 +3,8 @@ import axios, { isAxiosError } from "axios";
 
 function LoginPage() {
 
-    const [username, setUsername] = useState("admin");
-    const [password, setPassword] = useState("ciaone");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
