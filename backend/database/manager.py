@@ -223,4 +223,3 @@ def cout(obj: any):
     with open("cout.txt", "w") as file:
         file.write(str(obj) + "\n")
 
-

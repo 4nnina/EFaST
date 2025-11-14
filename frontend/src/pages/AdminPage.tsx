@@ -3,6 +3,7 @@ import AdminAuth from "../services/AdminAuth";
 import AdminTable from "../components/AdminTable";
 import RegisterPopup from "../components/RegPopup";
 import { registerUser } from "../services/UserAPI";
+import { exportCSV } from "../services/OptAPI";
 
 function AdminPage() {
   // 👇 tipi validi solo per i campi che vuoi usare nei filtri
@@ -109,6 +110,13 @@ function AdminPage() {
             className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200"
           >
             Logout
+          </button>
+
+          <button
+            onClick={exportCSV}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200"
+          >
+            Export 
           </button>
 
           <button

@@ -22,8 +22,6 @@ function PrefPage() {
 
       setUser(params["*"] || "Nothing");
 
-      
-
     }, []);
 
     useEffect(() => {
@@ -34,15 +32,15 @@ function PrefPage() {
 
             if (info) {
 
+                if (info.timeslots?.filter(ts => ts.weight === "not").length === undefined) {
+                    window.location.href = "/dashboard";
+                }
+
                 const notCount = info.timeslots?.filter(ts => ts.weight === "not").length || 0;
                 const NOTCount = info.timeslots?.filter(ts => ts.weight === "NOT").length || 0;
 
                 setMaxImp(info.maxImp - NOTCount);
                 setMaxNot(info.maxNot - notCount);
-
-                if (notCount == 0){
-                  window.location.href = "/dashboard";
-                }
 
                 setTs(info);
                 

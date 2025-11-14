@@ -36,3 +36,25 @@ export async function getJsonFiles() {
   }
 }
 
+export async function exportCSV() {
+  try {
+
+    const res = await axios.get("http://localhost:5000/getCSV", {
+      responseType: "blob"
+    })
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "file.csv"
+    link.click()
+
+    window.URL.revokeObjectURL(url);
+    alert("Download completed!");
+
+  } catch (err) {
+
+    alert("Error while downloading CSV.")
+
+  }
+}

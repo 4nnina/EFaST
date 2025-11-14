@@ -1,7 +1,7 @@
 import signal
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, HTML_Placeholder
 from logs.logConfig import logger
 import os, uvicorn, dotenv, json
@@ -22,6 +22,26 @@ app.add_middleware(
     allow_methods=["*"],         
     allow_headers=["*"]
 )
+
+def run_long_optimization():
+
+    import subprocess, shutil, sys
+
+    output_dir = "FAST/university_schedules_stats/"
+    main_script_path = os.path.abspath("FAST/src/main.py")
+
+    shutil.rmtree(output_dir, ignore_errors=True)
+    os.makedirs(output_dir, exist_ok=True)
+
+    bgProcess = subprocess.Popen(
+        [sys.executable, main_script_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=os.environ.copy()
+    )
+    os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
+    stdout, stderr = bgProcess.communicate(timeout=int(os.environ.get("FAST_TIMEOUT", 300)))
 
 
 @app.post("/auth", summary="Token authentication", tags=["Authentication"])
@@ -72,6 +92,43 @@ async def register(data: RegisterInfo):
     )
 
 
+@app.post("/runOptimization", summary="Start a new FAST optimization", tags=["Run optimization"])
+async def runOptimization(background_tasks: BackgroundTasks):
+    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
+    if bgPid!=-1:
+        try:
+            os.kill(bgPid, 0)
+            os.kill(bgPid, signal.SIGKILL)
+        except OSError:
+            pass
+        del os.environ["FAST_SUBPROCESS"]
+    background_tasks.add_task(run_long_optimization)
+    return JSONResponse(
+        status_code=200,
+        content={"status": "started", "message": "Optimization running in background"}
+    )
+
+
+@app.post("/stopOptimization", summary="Stopping a running FAST optimization", tags=["Stop optimization"])
+async def stopOptimization(): 
+    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
+    if bgPid!=-1:
+        try:
+            os.kill(bgPid, 0)
+            os.kill(bgPid, signal.SIGKILL)
+        except OSError:
+            pass
+        del os.environ["FAST_SUBPROCESS"]
+        return JSONResponse(
+            status_code=200,
+            content={"status": "stopped", "message": "Old optimization was stopped"}
+        )
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok", "message": "There was no optimization to stop"}
+    )
+
+
 @app.get("/info", summary="Fetch user preferences from user name", tags=["Get user preferences"])
 async def fetchInfo(user: str):
     result: dict = DBManager.getInfoFromUser(user)
@@ -92,120 +149,7 @@ async def fetchUsers():
     )
 
 
-@app.put("/update", summary="Update user preferences", tags=["Update user preferences"])
-async def updateInfo(data: UpdateInput):
-    result: dict = DBManager.getInfoFromUser(data.user)
-    if not result:
-        logger.info(f"[UPDATE] User {data.user} is absent.")
-    DBManager.updateTimeslotsFromUserId(result["id"], data.timeslots)
-    FAST.updateProfessorsConstraint()
-    logger.warning(f"[UPDATE] Timeslots of user {data.user} were updated succesfully.")
-    return JSONResponse(
-        status_code=200,
-        content={"message": "ok"}
-    )
-
-
-@app.delete("/remove", summary="Delete user instance and his/her preferences", tags=["Delete all of user"])
-async def deleteInfo(data: DeleteInput):
-    result: bool = DBManager.deleteUser(data.id)
-    if result:
-        logger.info(f"[REMOVE] User (id {data.id}) and his/her preferences were deleted succesfully.")
-        return JSONResponse(
-            status_code=200,
-            content={"ok": True}
-        )
-    logger.error("[REMOVE] Impossible to remove 'admin'.")
-    return JSONResponse(
-        status_code=409,
-        content={"ok": False}
-    )
-
-
-@app.put("/edit", summary="Edit user base info", tags=["Update user info"])
-async def updateBaseInfo(data: BaseUserInfo):
-    result: list[str] = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
-    if not result:
-        logger.info(f"[EDIT] Base info for {data.user} was updated succesfully.")
-        return JSONResponse(
-            status_code=200,
-            content={"ok": True}
-        )
-    logger.warning(f"[EDIT] Impossible to edit base info for {data.user}, here's why: { ', '.join(result) }")
-    return JSONResponse(
-        status_code=200,
-        content={"ok": False, "issues": result}
-    )
-
-
-def run_long_optimization():
-
-    import subprocess, shutil, sys
-
-    output_dir = "FAST/university_schedules_stats/"
-    main_script_path = os.path.abspath("FAST/src/main.py")
-
-    shutil.rmtree(output_dir, ignore_errors=True)
-    os.makedirs(output_dir, exist_ok=True)
-
-    bgProcess = subprocess.Popen(
-        [sys.executable, main_script_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        env=os.environ.copy()
-    )
-    os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
-    stdout, stderr = bgProcess.communicate(timeout=int(os.environ.get("FAST_TIMEOUT", 300)))
-
-
-@app.post("/runOptimization", summary="[complete]", tags=["[complete]"])
-async def runOptimization(background_tasks: BackgroundTasks):
-    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
-    if bgPid!=-1:
-        try:
-            os.kill(bgPid, 0)
-            os.kill(bgPid, signal.SIGKILL)
-        except OSError:
-            pass
-        del os.environ["FAST_SUBPROCESS"]
-    background_tasks.add_task(run_long_optimization)
-    return JSONResponse(
-        status_code=200,
-        content={"status": "started", "message": "Optimization running in background"}
-    )
-
-
-@app.post("/stopOptimization", summary="[complete]", tags=["[complete]"])
-async def stopOptimization(background_tasks: BackgroundTasks):
-    bgPid: int = int(os.environ.get("FAST_SUBPROCESS", -1))
-    if bgPid!=-1:
-        try:
-            os.kill(bgPid, 0)
-            os.kill(bgPid, signal.SIGKILL)
-        except OSError:
-            pass
-        del os.environ["FAST_SUBPROCESS"]
-        return JSONResponse(
-            status_code=200,
-            content={"status": "stopped", "message": "Old optimization was stopped"}
-        )
-    return JSONResponse(
-        status_code=200,
-        content={"status": "ok", "message": "There was no optimization to stop"}
-    )
-
-
-@app.get("/pstatus")
-async def pstatus():
-    bgProcess = int(os.environ.get("FAST_SUBPROCESS", -1))
-    return JSONResponse(
-        status_code=200,
-        content={"running": bgProcess!=-1}
-    )
-
-
-@app.get("/getJsonFiles", summary="[complete]", tags=["[complete]"])
+@app.get("/getJsonFiles", summary="Collection of all FAST algorithm JSON result", tags=["Get JSON Files"])
 async def getJsonFiles():
     output_dir: str = "FAST/university_schedules_stats/"
     files: list = sorted(glob(os.path.join(output_dir, 'fairness_data_*.json')))
@@ -228,10 +172,68 @@ async def getJsonFiles():
     )
 
 
+@app.get("/getCSV", summary="Getting content of 'constraint_professors.csv'", tags=["Get professors' constraints"])
+async def getCSV():
+    csvFile: str = "constraint_professors.csv"
+    csvPath: str = f"FAST/dataset/university/{csvFile}" 
+    return FileResponse(
+        path=csvPath,
+        media_type="text/csv",
+        filename=csvFile
+    )
+
+
 @app.get("/{everyPath:path}", summary="Main homepage HTML template", tags=["Homepage"], response_class=HTMLResponse)
 async def catchRoutes(everyPath: str):
     logger.debug("[HOMEPAGE] Route catcher, someone wants to see backend documentation.")
     return HTMLResponse(content=HTML_Placeholder())
+
+
+@app.put("/update", summary="Update user preferences", tags=["Update user preferences"])
+async def updateInfo(data: UpdateInput):
+    result: dict = DBManager.getInfoFromUser(data.user)
+    if not result:
+        logger.info(f"[UPDATE] User {data.user} is absent.")
+    DBManager.updateTimeslotsFromUserId(result["id"], data.timeslots)
+    FAST.updateProfessorsConstraint()
+    logger.warning(f"[UPDATE] Timeslots of user {data.user} were updated succesfully.")
+    return JSONResponse(
+        status_code=200,
+        content={"message": "ok"}
+    )
+
+
+@app.put("/edit", summary="Edit user base info", tags=["Update user info"])
+async def updateBaseInfo(data: BaseUserInfo):
+    result: list[str] = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
+    if not result:
+        logger.info(f"[EDIT] Base info for {data.user} was updated succesfully.")
+        return JSONResponse(
+            status_code=200,
+            content={"ok": True}
+        )
+    logger.warning(f"[EDIT] Impossible to edit base info for {data.user}, here's why: { ', '.join(result) }")
+    return JSONResponse(
+        status_code=200,
+        content={"ok": False, "issues": result}
+    )
+
+
+@app.delete("/remove", summary="Delete user instance and his/her preferences", tags=["Delete all of user"])
+async def deleteInfo(data: DeleteInput):
+    result: bool = DBManager.deleteUser(data.id)
+    if result:
+        logger.info(f"[REMOVE] User (id {data.id}) and his/her preferences were deleted succesfully.")
+        return JSONResponse(
+            status_code=200,
+            content={"ok": True}
+        )
+    logger.error("[REMOVE] Impossible to remove 'admin'.")
+    return JSONResponse(
+        status_code=409,
+        content={"ok": False}
+    )
+
 
 
 if __name__ == "__main__":

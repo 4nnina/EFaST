@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminAuth from "../services/AdminAuth";
 import { runOptimization, stopOptimization, getJsonFiles } from "../services/OptAPI";
 
-function PrefPage() {
+function CalcPage() {
   const [files, setFiles] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [latestData, setLatestData] = useState<any>(null);
@@ -145,7 +145,7 @@ function PrefPage() {
                   </tr>
                   <tr className="odd:bg-white even:bg-gray-50">
                     <td className="px-4 py-2 border font-semibold">
-                      Student Class Fairness
+                      Student Class Average Fairness
                     </td>
                     <td className="px-4 py-2 border">{fairnessAvg}</td>
                   </tr>
@@ -259,4 +259,4 @@ function PrefPage() {
   );
 }
 
-export default PrefPage;
+export default CalcPage;
