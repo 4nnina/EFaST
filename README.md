@@ -115,7 +115,7 @@
 ├── frontend
 │   ├── public                   # static files 
 │   │   └── ...
-│   ├── assets                   # files available for react
+│   ├── assets                   # available files for react
 │   │   └── ...
 │   ├── README.md                   # this file
 │   ├── run.sh                   # frontend starter
@@ -134,7 +134,7 @@
 └── LICENSE.txt                  # license
 ```
 
-(*) This directory contains the folders `src/` and `dataset/`, taken from <a href="https://github.com/4nnina/fair_seq_task_assignment">the FAST repo</a>. The file `src/main.py` was made by the previous thesis project. <br><br>
+(*) This directory contains the folders `src/` and `dataset/`, taken from <a href="https://github.com/4nnina/fair_seq_task_assignment">the FAST repo</a>. The file `src/main.py` comes from the previous thesis project. <br><br>
 
 ## 📌 Credits
 
