@@ -1,46 +1,57 @@
-<br>
+<div align="center">
 
-# FAST Thesis Project 🚀
+  <h1>🎯 FAST Thesis Project</h1>
 
-Welcome to the **FAST Project** — a research‑oriented software system combining Python and Node.js (Typescript) to manage and execute the FAST algorithm (repo <a href="https://github.com/4nnina/fair_seq_task_assignment">HERE</a>). <br> This project is created in order to (... future description ...) for a bachelor degree thesis in computer science by Fortunato Alessandro at University Of Verona, licensed under MIT License. <br><br>
+  ![Version](https://img.shields.io/badge/Version-0.1.0-blue)
+  ![License](https://img.shields.io/badge/License-MIT-green)
+  ![Python](https://img.shields.io/badge/Python-3.10+-blue)
+  ![FastAPI](https://img.shields.io/badge/FastAPI-0.120+-green)
+  ![React](https://img.shields.io/badge/React-19.2+-blue)
+  ![Nodejs](https://img.shields.io/badge/NodeJs-20.19+-green)
 
-## 🛠️ Prerequisites
+</div><br>
 
-Make sure you have (at least) the following versions installed:
+  Welcome to the FAST Project — a research‑oriented software system combining Python and Node.js (Typescript) to manage and execute the FAST algorithm (repo <a href="https://github.com/4nnina/fair_seq_task_assignment">HERE</a>). <br> This project is created in order to (... future description ...) for a bachelor degree thesis in computer science by Fortunato Alessandro at University Of Verona. <br><br>
 
-- **Python** ‑ version `3.10.x`  
-- **Node.js** ‑ version `20.19.x`  
-- **npm** ‑ version `10.8.x`
-- **git** - version `2.34.x`  
-
-To verify, run the following commands:
-
-- **Python** ‑ `python3 --version`  
-- **Node.js** ‑ `node --version`    
-- **npm** ‑ `npm --version`  
-- **git** - `git --version`  <br><br>
 
 ## 📦 Installation & Setup
 
-1. Clone and go into the repository  
+1. **Clone and go into the repository**
    ```bash
    git clone https://github.com/Fortu032/FAST_thesis.git
    cd FAST_thesis
    ```
 
-2. Set up the Python backend environment and installing the libraries
+2. **Set up the Python backend environment**
 
+  _Creating & joining the backend virtual environment_
    ```bash
    cd backend
    python3 -m venv venv                     
    source venv/bin/activate                 # On Windows: venv\Scripts\activate
+   ```
+
+   _Installing the libraries_
+   ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
-   mv .env.example .env                     # Then modify .env variables
+   ```
+
+   _Setupping environment variables_
+
+   ```bash
+   cp .env.example .env                     
+   nano .env                                 # Modify with your favorite values
+   rm .env.example                           # Now It's useless
+   ```
+
+  _Quitting the backend virtual environment_
+
+  ```bash
    deactivate
    ```
 
-3. Set up the Node.js frontend environment and installing the libraries
+3. **Set up the NodeJs frontend environment**
 
    ```bash
    cd ../frontend
@@ -50,33 +61,33 @@ To verify, run the following commands:
 
 ## 🚀 Running the Application
 
-1. Open two different terminal and move both into the main dir
+1. **Open two different terminal and move both into the main dir**
 
     ```bash
    cd FAST_thesis
    ```
 
-2. Go into the backend dir and start the server (1st terminal)
+2. **Go into the backend dir and start the server (1st terminal)**
 
    ```bash
    cd backend
    ./run.sh
    ```
 
-3. Go into the frontend dir and start the client (2nd terminal)
+3. **Go into the frontend dir and start the client (2nd terminal)**
 
    ```bash
    cd frontend
    ./run.sh
    ```
 
-4. Open the following link to see the backend server documentation (optional)
+4. **Open the following link to see the backend server documentation (optional)**
 
    ```bash
    http://127.0.0.1:{FASTAPI_PORT}                # FASTAPI_PORT = value from variable in .env
    ```
 
-5. Open the following link to get to the final application
+5. **Open the following link to get to the final application**
 
    ```bash
    http://127.0.0.1:{VITE_PORT}              # VITE_PORT = value from variable in 'frontend/run.sh'
@@ -102,9 +113,9 @@ To verify, run the following commands:
 │   ├── requirements.txt                  # needed python libraries
 │   └── run.sh                  # backend starter
 ├── frontend
-│   ├── public                   # static files ?
+│   ├── public                   # static files 
 │   │   └── ...
-│   ├── assets                   # static files for the application
+│   ├── assets                   # files available for react
 │   │   └── ...
 │   ├── README.md                   # this file
 │   ├── run.sh                   # frontend starter
@@ -123,11 +134,11 @@ To verify, run the following commands:
 └── LICENSE.txt                  # license
 ```
 
-(*) the content in FAST dir has been imported from <a href="https://github.com/4nnina/fair_seq_task_assignment">this REPO</a>, following the guide in the README files. <br><br>
+(*) This directory contains the folders `src/` and `dataset/`, taken from <a href="https://github.com/4nnina/fair_seq_task_assignment">the FAST repo</a>. The file `src/main.py` was made by the previous thesis project. <br><br>
 
 ## 📌 Credits
 
-Old thesis project (by Andrea Rosa): <a href="https://github.com/4nnina/FAST-UI">https://github.com/4nnina/FAST-UI</a><br><br>
+Previous thesis project (by Andrea Rosa): <a href="https://github.com/4nnina/FAST-UI">https://github.com/4nnina/FAST-UI</a><br><br>
 
 ---
 
