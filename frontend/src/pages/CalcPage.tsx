@@ -1,12 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import AdminAuth from "../services/AdminAuth";
 import { runOptimization, stopOptimization, getJsonFiles } from "../services/OptAPI";
+import { CalcPlot } from "../components/CalcPlot";
 
 function CalcPage() {
   const [files, setFiles] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [latestData, setLatestData] = useState<any>(null);
   const prevLength = useRef<number>(0);
+
+  const [avg, setAvg] = useState<number[]>([]);
+  const [glb, setGlb] = useState<number[]>([]);
 
   // 🔁 Polling ogni 2 secondi per i file JSON
   useEffect(() => {
@@ -21,6 +25,28 @@ function CalcPage() {
             if (data.length > prevLength.current) {
               const newest = data[data.length - 1];
               setLatestData(newest.content || null);
+
+              // 🔢 Calcolo media fairness studenti
+              let avgNum = 0;
+              if (newest.content?.degrees) {
+                const degrees = newest.content.degrees;
+                const values: number[] = [];
+
+                // Prende tutti i valori numerici direttamente
+                Object.entries(degrees).forEach(([key, val]) => {
+                  if (typeof val === "number") values.push(val);
+                });
+
+                if (values.length > 0) {
+                  avgNum = values.reduce((a, b) => a + b, 0) / values.length;
+                  avgNum = Math.round(avgNum * 100) / 100; // 2 decimali
+                }
+              }
+
+              setAvg((avg) => [...avg, avgNum]);
+
+              const glbNum = newest.content?.final_fairness || 0;
+              setGlb((glb) => [...glb, Math.round(glbNum * 100) / 100]);
             }
             prevLength.current = data.length;
             setFiles(data);
@@ -40,17 +66,16 @@ function CalcPage() {
   const handleOptimizationToggle = async () => {
     try {
       if (!isRunning) {
-        // 🧹 Reset dei dati precedenti
         setLatestData(null);
         setFiles([]);
         prevLength.current = 0;
+        setAvg([]);
+        setGlb([]);
 
-        // ▶️ Avvia nuova ottimizzazione
         setIsRunning(true);
         const res = await runOptimization();
         console.log(res.message || "Ottimizzazione avviata!");
       } else {
-        // ⏹️ Ferma l’ottimizzazione
         const res = await stopOptimization();
         console.log(res.message || "Ottimizzazione fermata!");
         setIsRunning(false);
@@ -92,9 +117,9 @@ function CalcPage() {
   const totalProfessors = latestData?.professors?.length || 0;
   const unfairProfessors = latestData?.["Fairness < 100%"] || 0;
   const worstFairness = latestData?.["Worst Percentage"] || 0;
-  const globalFairness = latestData?.final_fairness?.toFixed(2) || "-";
+  const globalFairness = latestData?.final_fairness?.toFixed(2) || "0";
 
-  // 📊 Calcola la media dei valori nella tabella Fairness by Year and Degree
+  // 📊 Calcola la media dei valori nella tabella Fairness by Year and Degree per display
   let fairnessAvg = "-";
   if (tableData) {
     const values: number[] = [];
@@ -104,15 +129,13 @@ function CalcPage() {
       });
     });
     if (values.length > 0) {
-      const avg = values.reduce((a, b) => a + b, 0) / values.length;
-      fairnessAvg = avg.toFixed(2);
+      fairnessAvg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
   }
 
   return (
     <AdminAuth>
       <div className="flex flex-col items-center gap-3">
-
         {/* Welcome title */}
         <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
           <h1 className="text-4xl font-extrabold text-white">
@@ -223,6 +246,13 @@ function CalcPage() {
                 </table>
               </div>
             </div>
+
+            {/* 📊 Plot AVG e GLB */}
+            {(avg.length > 0 || glb.length > 0) && (
+              <div className="mt-6">
+                <CalcPlot avg={avg} glb={glb} />
+              </div>
+            )}
           </div>
         )}
         <div className="h-[1px]"></div>
@@ -254,7 +284,7 @@ function CalcPage() {
             </p>
           </div>
         </div>
-      </div>
+      </div><br/><br/>
     </AdminAuth>
   );
 }
