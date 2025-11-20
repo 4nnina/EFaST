@@ -7,8 +7,8 @@
         },
         {
             "name": "41",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -1.0,
+            "percentage": 83.0
         },
         {
             "name": "31",
@@ -47,18 +47,18 @@
         },
         {
             "name": "4",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -1.0,
+            "percentage": 77.0
         },
         {
             "name": "55",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -0.5,
+            "percentage": 91.0
         },
         {
             "name": "88",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -1.5,
+            "percentage": 75.0
         },
         {
             "name": "54",
@@ -82,13 +82,13 @@
         },
         {
             "name": "57",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -1.0,
+            "percentage": 83.0
         },
         {
             "name": "32",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -0.5,
+            "percentage": 91.0
         },
         {
             "name": "112",
@@ -127,13 +127,13 @@
         },
         {
             "name": "33",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -0.5,
+            "percentage": 91.0
         },
         {
             "name": "35",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -1.0,
+            "percentage": 83.0
         },
         {
             "name": "85",
@@ -152,27 +152,27 @@
         },
         {
             "name": "50",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -0.5,
+            "percentage": 91.0
         },
         {
             "name": "83",
-            "fairness": 0.0,
-            "percentage": 100.0
+            "fairness": -2.0,
+            "percentage": 66.0
         }
     ],
     "degrees": {
-        "Fairness Score year 1 Bio": -0.9,
-        "Fairness Score year 2 Bio": -0.8,
-        "Fairness Score year 3 Bio": -2002.338888888889,
-        "Fairness Score year 1 Inf": -1.5,
-        "Fairness Score year 2 Inf": -1.835294117647059,
-        "Fairness Score year 3 Inf": -1.2592592592592593,
-        "Fairness Score year 1 BioInf": -2001.3277777777778,
-        "Fairness Score year 2 BioInf": -1.4974358974358974,
-        "Fairness Score year 3 BioInf": -1.0105263157894737
+        "Fairness Score year 1 Bio": -0.7,
+        "Fairness Score year 2 Bio": -0.6,
+        "Fairness Score year 3 Bio": -4002.082051282051,
+        "Fairness Score year 1 Inf": -1.4555555555555555,
+        "Fairness Score year 2 Inf": -1.2777777777777777,
+        "Fairness Score year 3 Inf": -1.5909090909090908,
+        "Fairness Score year 1 BioInf": -1.6600000000000001,
+        "Fairness Score year 2 BioInf": -1.5,
+        "Fairness Score year 3 BioInf": -1001.0
     },
-    "final_fairness": -222.91495456982213,
-    "Fairness < 100%": 0,
-    "Worst Percentage": 100
+    "final_fairness": -278.5854538170163,
+    "Fairness < 100%": 10,
+    "Worst Percentage": 66.0
 }

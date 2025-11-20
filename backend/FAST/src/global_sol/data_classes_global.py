@@ -151,7 +151,6 @@ class GlobalUniveristyFromLocal(GlobalUniversity):
         self.list_prof = []
         self.list_degree = []
 
-       
         for degree in list_degree:
             self.list_degree.append(copy.deepcopy(degree))
 

@@ -58,6 +58,7 @@ dist/
 *.sqlite3
 !backend/database/db.sqlite3
 backend/cout.txt
+backend/FAST/university_schedules_stats
 
 # Migrations
 migrations/

@@ -29,11 +29,105 @@ def performSaUI(curr_sol, paretoSet, paretoFront, initialTemp, finalTemp, alpha,
         best_sol = max(paretoSet, key=lambda x: x.fairness_score())
         print("\n" + "="*80)
         print(f"Temperature: {temperature:.2f}")
+
+        ## --- my code --- ##
+
+        conflicts: dict = {
+            "iteration": c,
+            "conflicts": [],
+        }
+
+        assignments: dict = {
+            "iteration": c,
+            "assignments": []
+        }
+
+        constraints: dict = {
+            "iteration": c,
+            "constraints": []
+        }
+
+        def fromTuplesToLanguage(slots: list) -> list:
+            slotsNew: list = []
+            for s in slots:
+                numToDay: dict = {
+                    0: "Lun",
+                    1: "Mar",
+                    2: "Mer",
+                    3: "Gio",
+                    4: "Ven",
+                    5: "Sab",
+                    6: "Dom"
+                }
+                numToHour: dict = {
+                    0: "8:30-9:30",
+                    1: "9:30-10:30",
+                    2: "10:30-11:30",
+                    3: "11:30-12:30",
+                    4: "12:30-13:30",
+                    5: "13:30-14:30",
+                    6: "14:30-15:30",
+                    7: "15:30-16:30",
+                    8: "16:30-17:30",
+                    9: "17:30-18:30",
+                    10: "18:30-19:30"
+                }
+                slotsNew.append(f"{numToDay[s[0]]} {numToHour[s[1]]}")
+            return slotsNew
+        
+        def fromTimelineToHours(timeline):
+            takenList = []
+            days = 5
+            hours = 11
+            for day in range(days):
+                for hour in range(hours):
+                    if timeline[day][hour] is not None:
+                        takenList.append((day, hour))
+            return fromTuplesToLanguage(takenList)
+        
+        def fromConstraintsToHours(constraints, impossible):
+            constrList = []
+            days = 5
+            hours = 11
+            for day in range(days):
+                for hour in range(hours):
+                    if (constraints[day][hour]==-1 and impossible) or (constraints[day][hour]==-0.5 and not impossible):
+                        constrList.append((day, hour))
+            return fromTuplesToLanguage(constrList)
+
+        for prof in sorted(best_sol.list_prof, key=lambda x: x.name):
+            assignments["assignments"].append({
+                "prof_id": prof.name,
+                "slots": fromTimelineToHours(prof.timeline)
+            })
+            conflicts["conflicts"].append({
+                "prof_id": prof.name,
+                "better_not_unsatisfied": fromTuplesToLanguage(prof.get_unsatisfied_constraints()),
+                "impossible_unsatisfied": fromTuplesToLanguage(prof.get_unsatisfied_impossible_constraints())
+            })
+            constraints["constraints"].append({
+                "prof_id": prof.name,
+                "better_not_slots": fromConstraintsToHours(prof.constraints, False),
+                "impossible_slots": fromConstraintsToHours(prof.constraints, True)
+            })
+
+        # REMIND : togli indent in futuro!
+
+        with open("FAST/university_schedules_stats/conflicts.json", "w") as file:
+            json.dump(conflicts, file, indent=4)
+
+        with open("FAST/university_schedules_stats/assignments.json", "w") as file:
+            json.dump(assignments, file, indent=4)
+
+        with open("FAST/university_schedules_stats/constraints.json", "w") as file:
+            json.dump(constraints, file, indent=4)
+
+        ## --------------- ##
+
         print(best_sol.getSingleFairnessScore())
         print(f"Current Fairness Score: {best_sol.fairness_score()}")
         print("="*80)
 
-        
         c += 1
         temperature = initialTemp - alpha * c
 
