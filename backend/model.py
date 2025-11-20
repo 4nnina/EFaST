@@ -45,6 +45,7 @@ class DeleteInput(BaseModel):
     id: int
 
 
+
 class DBManager:
 
     @staticmethod
