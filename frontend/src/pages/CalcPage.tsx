@@ -3,6 +3,7 @@ import AdminAuth from "../services/AdminAuth";
 import { runOptimization, stopOptimization, getJsonFiles } from "../services/OptAPI";
 import { CalcPlot } from "../components/CalcPlot";
 import RunPopup from "../components/RunPopup";
+import ExplainPopup from "../components/ExplainPopup";
 
 function CalcPage() {
   const [files, setFiles] = useState<any[]>([]);
@@ -14,12 +15,14 @@ function CalcPage() {
 
   const [avg, setAvg] = useState<number[]>([]);
   const [glb, setGlb] = useState<number[]>([]);
+  const [profAvg, setProfAvg] = useState<number[]>([]);  // 👈 NUOVO ARRAY
 
-  // Popup + stop config
+  // Popup + configurazione di stop (solo iterazioni)
   const [isRunPopupOpen, setIsRunPopupOpen] = useState(false);
-  const [stopConfig, setStopConfig] = useState<{ type: "time" | "iterations"; value: number } | null>(null);
+  const [stopConfig, setStopConfig] = useState<{ type: "iterations"; value: number } | null>(null);
+  const [expectedEnd, setExpectedEnd] = useState<string | null>(null);
 
-  // Polling ogni 2 secondi
+  // Polling ogni 2s
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
@@ -33,19 +36,44 @@ function CalcPage() {
               const newest = data[data.length - 1];
               setLatestData(newest.content || null);
 
-              // Calcolo media fairness
+              // --------------------------
+              // Media local fairness (avg)
+              // --------------------------
               let avgNum = 0;
               if (newest.content?.degrees) {
-                const values = Object.values(newest.content.degrees).filter(v => typeof v === "number") as number[];
+                const values = Object.values(newest.content.degrees)
+                  .filter(v => typeof v === "number") as number[];
                 if (values.length > 0) {
                   avgNum = Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100;
                 }
               }
-
               setAvg((a) => [...a, avgNum]);
 
+              // --------------------------
+              // Global fairness (glb)
+              // --------------------------
               const glbNum = newest.content?.final_fairness || 0;
               setGlb((g) => [...g, Math.round(glbNum * 100) / 100]);
+
+              // -------------------------------------------------------
+              // Media fairness dei professori (professors[i].fairness)
+              // -------------------------------------------------------
+              let professorFair = 0;
+              const profs = newest.content?.professors;
+
+              if (Array.isArray(profs)) {
+                const list = profs
+                  .map((p: any) => Number(p.fairness))
+                  .filter((v) => !isNaN(v)); // solo numeri validi
+
+                if (list.length > 0) {
+                  const avg = list.reduce((sum, val) => sum + val, 0) / list.length;
+                  professorFair = Math.round(avg * 100) / 100; // arrotonda a 2 decimali
+                }
+              }
+
+              setProfAvg((prev) => [...prev, professorFair]);
+
             }
 
             prevLength.current = data.length;
@@ -60,70 +88,67 @@ function CalcPage() {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // ▶️ Start/Stop manuale
+  // ▶️ Start / Stop manuale
   const handleOptimizationToggle = async () => {
     try {
       if (!isRunning) {
-        // START
+        // Reset
         setLatestData(null);
         setFiles([]);
         prevLength.current = 0;
         setAvg([]);
         setGlb([]);
+        setProfAvg([]);  // 👈 RESET NUOVO ARRAY
 
         setIsRunning(true);
         setRunState("running");
 
         await runOptimization();
       } else {
-        // STOP manuale
         await stopOptimization();
         setIsRunning(false);
         setRunState("stopped");
       }
     } catch (err) {
-      console.error("Errore durante l'avvio/arresto:", err);
+      console.error("Errore durante avvio/arresto:", err);
       setIsRunning(false);
       setRunState("stopped");
     }
   };
 
-  // Avvio con popup
-  const handleStartWithConfig = async (config: any) => {
+  // ▶️ Start con configurazione (solo iterazioni)
+  const handleStartWithConfig = async (config: { type: "iterations"; value: number }) => {
     setIsRunPopupOpen(false);
     setStopConfig(config);
+
+    const n = config.value;
+    const totalSeconds = 6 * n * n + (23 / 2) * n;
+
+    const endDate = new Date(Date.now() + totalSeconds * 1000);
+    const formatted =
+      endDate.getHours().toString().padStart(2, "0") +
+      ":" +
+      endDate.getMinutes().toString().padStart(2, "0");
+
+    setExpectedEnd(formatted);
     handleOptimizationToggle();
   };
 
-  // ⏹ AUTO-STOP (tempo o iterazioni)
+  // ⏹ Auto-Stop (solo iterazioni)
   useEffect(() => {
     if (!isRunning || !stopConfig) return;
 
-    // STOP PER TEMPO
-    if (stopConfig.type === "time") {
-      const timer = setTimeout(async () => {
-        await stopOptimization();
-        
-        setIsRunning(false);
-        setRunState("completed");
-
-      }, stopConfig.value * 1000);
-
-      return () => clearTimeout(timer);
-    }
-
-    // STOP PER ITERAZIONI
-    if (stopConfig.type === "iterations") {
-      if (files.length >= stopConfig.value) {
-        stopOptimization();
-        
-        setIsRunning(false);
-        setRunState("completed");
-      }
+    if (files.length >= stopConfig.value) {
+      stopOptimization();
+      setIsRunning(false);
+      setRunState("completed");
     }
   }, [isRunning, stopConfig, files.length]);
 
+  // ----------------------
   // Interpretazione dati
+  // ----------------------
+
   const getFairnessTable = () => {
     if (!latestData?.degrees) return null;
 
@@ -156,7 +181,7 @@ function CalcPage() {
   const worstFairness = latestData?.["Worst Percentage"] || 0;
   const globalFairness = latestData?.final_fairness?.toFixed(2) || "0";
 
-  // Average fairness
+  // Average fairness (local)
   let fairnessAvg = "-";
   if (tableData) {
     const values: number[] = [];
@@ -170,19 +195,68 @@ function CalcPage() {
     }
   }
 
+  // ----------------------
+  // Render
+  // ----------------------
+
   return (
     <AdminAuth>
       <div className="flex flex-col items-center gap-3">
-        
-        {/* Title */}
+
+        {/* title */}
         <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
           <h1 className="text-4xl font-extrabold text-white">Perform calculation</h1>
         </div>
 
+        {/* Status Panel */}
+        {stopConfig && (
+          <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md mt-6 border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              
+              {/* State */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                <p className="text-sm text-gray-500 font-medium">State</p>
+                <p
+                  className={`text-xl font-bold mt-1 ${
+                    runState === "running"
+                      ? "text-green-600"
+                      : runState === "completed"
+                      ? "text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {runState === "running"
+                    ? "Running"
+                    : runState === "completed"
+                    ? "Completed"
+                    : "Stopped"}
+                </p>
+              </div>
+
+              {/* Iterations */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                <p className="text-sm text-gray-500 font-medium">Iterations</p>
+                <p className="text-xl font-bold mt-1 text-gray-800">
+                  {files.length} / {stopConfig.value}
+                </p>
+              </div>
+
+              {/* End time */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                <p className="text-sm text-gray-500 font-medium">Expected End Time</p>
+                <p className="text-xl font-bold mt-1 text-gray-800">
+                  {expectedEnd || "-"}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        )}
+
         {/* Results */}
         {latestData && (
           <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md space-y-8">
-            <h3 className="text-xl font-semibold text-center">Optimization Results</h3>
+            <h3 className="text-xl font-semibold text-center mt-6 mb-4">Optimization Results</h3>
 
             {/* Main stats */}
             <div className="flex justify-center">
@@ -214,9 +288,10 @@ function CalcPage() {
               </table>
             </div>
 
-            {/* Worst fairness indicator */}
+            {/* Worst fairness */}
             <div>
-              <h4 className="font-semibold text-center mb-2">
+              <hr />
+              <h4 className="font-semibold text-center mb-2 mt-6">
                 Professor Worst Fairness Indicator
               </h4>
 
@@ -230,13 +305,15 @@ function CalcPage() {
               </div>
 
               <div className="flex justify-between text-sm mt-1 text-gray-500">
-                <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                <span>0%</span><span>25%</span><span>50%</span>
+                <span>75%</span><span>100%</span>
               </div>
             </div>
 
             {/* Fairness by degree */}
             <div>
-              <h4 className="font-semibold text-center mb-3">Fairness by Year and Degree</h4>
+              <hr />
+              <h4 className="font-semibold text-center mb-3 mt-6">Fairness by Year and Degree</h4>
               <div className="overflow-x-auto">
                 <table className="min-w-full border border-gray-300 text-sm text-center rounded-xl">
                   <thead className="bg-gray-100">
@@ -264,16 +341,16 @@ function CalcPage() {
               </div>
             </div>
 
-            {/* Plots */}
-            {(avg.length > 0 || glb.length > 0) && (
-              <div className="mt-6">
-                <CalcPlot avg={avg} glb={glb} />
+            {/* Plot */}
+            {(avg.length > 0 || glb.length > 0 || profAvg.length > 0) && (
+              <div className="mt-6 flex justify-center">
+                <div className="w-full max-w-3xl">
+                  <CalcPlot avg={avg} glb={glb} profAvg={profAvg} /> {/* 👈 TERZO ARRAY PASSATO */}
+                </div>
               </div>
             )}
           </div>
         )}
-
-        <br />
 
         {/* RUN / STOP BUTTON */}
         <div className="mt-10 flex flex-col items-center gap-4">
@@ -288,34 +365,8 @@ function CalcPage() {
           >
             {isRunning ? "STOP OPTIMIZATION" : "RUN NEW OPTIMIZATION"}
           </button>
-
-          <div className="text-center">
-            <p>📂 Number of iterations: {files.length}</p>
-
-            <p>
-              🕓 State:{" "}
-              <span
-                className={`font-semibold ${
-                  runState === "running"
-                    ? "text-green-600"
-                    : runState === "completed"
-                    ? "text-blue-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {runState === "completed"
-                  ? "Completed"
-                  : runState === "running"
-                  ? "Running"
-                  : "Stopped"}
-              </span>
-            </p>
-          </div>
         </div>
-
-      </div>
-
-      <br /><br /><br />
+      </div><br/><br/><br/>
 
       {/* Popup */}
       {isRunPopupOpen && (
@@ -324,6 +375,7 @@ function CalcPage() {
           onConfirm={handleStartWithConfig}
         />
       )}
+      <ExplainPopup />
     </AdminAuth>
   );
 }

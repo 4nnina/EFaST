@@ -5,6 +5,7 @@ import AdminPage from './pages/AdminPage';
 import NoPage from './pages/NoPage';
 import PrefPage from './pages/PrefPage';
 import CalcPage from './pages/CalcPage';
+import ExplainPage from './pages/ExplainPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/homepage" element={<HomePage />} />
         <Route path="/preferences/*" element={<PrefPage />} />
         <Route path="/calculate" element={<CalcPage />} />
+        <Route path="/explain" element={<ExplainPage />} />
         <Route path="*" element={<NoPage />} />
       </Routes>
     </Router>
