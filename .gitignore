@@ -47,8 +47,8 @@ dist/
 *.swo
 
 # TEXT FILES
-*.txt
-!LICENSE.txt
+result.txt
+cout.txt
 
 # ==========================
 # Backend (FastAPI)
@@ -58,7 +58,6 @@ dist/
 *.sqlite
 *.sqlite3
 !backend/database/db.sqlite3
-!backend/requirements.txt
 backend/FAST/university_schedules_stats
 backend/FAST/dataset
 backend/FAST/src
