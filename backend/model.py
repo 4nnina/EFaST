@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from database.manager import Query, cout
 from logs.logConfig import logger
-import bcrypt, datetime as dt
+import bcrypt, datetime as dt, json
 import secrets, os, pandas as pd
 
 
@@ -44,6 +44,8 @@ class BaseUserInfo(BaseModel):
 class DeleteInput(BaseModel):
     id: int
 
+class ExplainInfo(BaseModel):
+    prompt: str
 
 
 class DBManager:
@@ -178,8 +180,6 @@ class DBManager:
 
 class FAST:
 
-    # FOR ME: valutare di accorpare orari consecutivi (?)
-
     @staticmethod
     def updateProfessorsConstraint() -> None:
         csvFile: str = "FAST/dataset/university/constraint_professors.csv"
@@ -198,3 +198,59 @@ class FAST:
             dataFrame = pd.concat([dataFrame, pd.DataFrame([nts])], ignore_index=True)
         dataFrame.to_csv(csvFile, index=False)
         logger.info(f"[FAST] File '{csvFile}' was updated succesfully.")
+
+    @staticmethod
+    def getExplainationData(prompt: str):
+        
+        jsonPath: str = "FAST/university_schedules_stats"
+        iterStr: str = "001"
+
+        jsonFiles = len(os.listdir(jsonPath))
+        iter = jsonFiles - 3
+
+        if 1 <= iter and iter <= 9:
+            iterStr = f"00{iter}"
+        elif 10 <= iter and iter <= 99:
+            iterStr = f"0{iter}"
+        elif 100 <= iter and iter <= 999:
+            iterStr = f"{iter}"
+
+        def jd(jsonData: dict) -> str:
+            return json.dumps(jsonData, separators=(",", ":"))
+
+        with open(f"prompts/{prompt}.md", "r") as file:
+            mainText: str = file.read()
+        with open(f"{jsonPath}/constraints.json", "r") as file:
+            j1: dict = json.load(file)
+        with open(f"{jsonPath}/assignments.json", "r") as file:
+            j2: dict = json.load(file)
+        with open(f"{jsonPath}/conflicts.json", "r") as file:
+            j3: dict = json.load(file)
+        with open(f"{jsonPath}/fairness_data_{iterStr}.json", "r") as file:
+            j4: dict = json.load(file)
+        promptRes: str = mainText.format(jd(j1), jd(j2), jd(j3), jd(j4))
+
+        return {
+            "constraints": j1,
+            "assignments": j2,
+            "conflicts": j3,
+            "fairness_data": j4,
+            "prompt": {
+                "source": prompt,
+                "text": promptRes
+            }
+        }
+        
+    # deprecated
+    @staticmethod
+    def getResultsExplaination(model: str, prompt: str) -> dict:
+        # modelAI: LLM_Model = LLM_Model.get(model, prompt)
+        modelAI = 0
+        print(modelAI.getModelName())
+        if modelAI.authenticate():
+            response: dict = modelAI.send()
+            modelAI.close()
+            if response["ok"]:
+                return { "ok": True, "text": response["text"] }
+            return { "ok": False, "text": "Something went wrong while generating the response" }
+        return { "ok": False, "text": "LLM Authentication failed" }

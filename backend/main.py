@@ -2,7 +2,7 @@ import signal
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
-from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, HTML_Placeholder
+from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, ExplainInfo, HTML_Placeholder
 from logs.logConfig import logger
 import os, uvicorn, dotenv, json
 from database.manager import cout
@@ -41,7 +41,7 @@ def run_long_optimization():
         env=os.environ.copy()
     )
     os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
-    stdout, stderr = bgProcess.communicate(timeout=int(os.environ.get("FAST_TIMEOUT", 300)))
+    stdout, stderr = bgProcess.communicate()
 
 
 @app.post("/auth", summary="Token authentication", tags=["Authentication"])
@@ -180,6 +180,15 @@ async def getCSV():
         path=csvPath,
         media_type="text/csv",
         filename=csvFile
+    )
+
+
+@app.post("/explainationData", summary="Getting the calculation data for the LLM", tags=["Get calculation data"])
+async def explainationData(data: ExplainInfo):
+    prompt: str = data.prompt if data.prompt else "prompt-v1"
+    return JSONResponse(
+        status_code=200,
+        content=FAST.getExplainationData(prompt)
     )
 
 

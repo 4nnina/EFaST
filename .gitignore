@@ -16,9 +16,6 @@ log/
 *.seed
 *.pid.lock
 
-# Text files
-*.txt
-
 # Python virtualenv
 venv/
 env/
@@ -59,6 +56,8 @@ dist/
 !backend/database/db.sqlite3
 backend/cout.txt
 backend/FAST/university_schedules_stats
+backend/FAST/dataset
+backend/FAST/src
 
 # Migrations
 migrations/

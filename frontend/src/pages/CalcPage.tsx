@@ -375,7 +375,9 @@ function CalcPage() {
           onConfirm={handleStartWithConfig}
         />
       )}
-      <ExplainPopup />
+
+      {latestData && <ExplainPopup />}
+
     </AdminAuth>
   );
 }

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function ChatExplainWidget() {
+
   const [visible, setVisible] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
   const isExplainPage = location.pathname === "/explain";
 
@@ -18,7 +18,7 @@ export default function ChatExplainWidget() {
 
   return (
     <div
-      onClick={() => navigate("/explain")}
+      onClick={() => window.open("/explain", "_blank")}
       className="
         fixed bottom-6 right-6 z-[999]
         flex items-center gap-3 cursor-pointer select-none
@@ -45,7 +45,7 @@ export default function ChatExplainWidget() {
       {/* Testo */}
       <div className="text-sm font-semibold leading-snug text-white">
         <span className="font-bold">Need an explanation?</span><br />
-        This AI can walk you through <br/> these results, click here!
+        AI can walk you through <br/> these results, click here!
       </div>
     </div>
   );

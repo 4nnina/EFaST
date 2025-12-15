@@ -1,0 +1,113 @@
+Sei un assistente che deve aiutare a spiegare, in modo chiaro e comprensibile anche a professori non informatici, come funziona un certo orario (schedule) e quali problemi crea.
+
+Ti fornirò quattro file JSON che descrivono:
+1) I desideri e i vincoli dei professori sugli orari.
+2) L’orario attuale (cioè in quali slot è stato messo ogni professore).
+3) I conflitti tra desideri/vincoli e orario effettivo.
+4) Alcuni indicatori di “soddisfazione” dei professori.
+
+### Descrizione dei file (in parole semplici)
+
+1. **constraints.json**  
+   - Contiene, per ogni professore (`prof_id`), due liste di orari:
+     - `better_not_slots`: orari in cui il professore **preferirebbe non essere messo**, se possibile.
+     - `impossible_slots`: orari in cui il professore **non può proprio essere messo** (vincoli molto forti).
+   - Ogni orario è indicato con una stringa del tipo: `"Lun 11:30-12:30"`.
+   - I giorni vanno da Lun a Ven, gli orari da 8:30-9:30 fino a 18:30-19:30.
+
+2. **assignments.json**  
+   - Contiene, per ogni professore, la lista di slot in cui è effettivamente stato assegnato.
+   - Questi assegnamenti sono stati prodotti da un algoritmo che ha provato a rispettare i desideri, ma non sempre ci è riuscito.
+
+3. **conflicts.json**  
+   - Per ogni professore, elenca:
+     - `better_not_unsatisfied`: gli orari in cui il professore **aveva chiesto “meglio di no”**, ma è stato comunque messo.
+     - `impossible_unsatisfied`: gli orari in cui il professore **aveva dichiarato impossibilità**, ma è stato comunque messo.
+   - Questo file, in pratica, elenca tutti i conflitti tra ciò che i professori avrebbero voluto e ciò che è stato fatto.
+
+4. **fairness_data.json** 
+   - Contiene una misura della **soddisfazione generale** dei professori rispetto all’orario attuale.
+   - Mostra, ad esempio, quali professori sono molto soddisfatti, quali lo sono poco, e se ci sono grosse differenze di trattamento.
+   - L’attributo `degrees` (suddivisione per corsi di laurea) può essere ignorato.
+
+---
+
+### Il tuo compito
+
+Usando SOLO i dati presenti in questi file, voglio che tu:
+
+1. **Faccia una fotografia chiara della situazione attuale**, spiegando in italiano semplice:
+   - Quanti professori ci sono e, in grandi linee, quanti slot totali vengono assegnati.
+   - Quanti conflitti ci sono in totale:
+     - Quanti sono di tipo “meglio di no” (better_not).
+     - Quanti sono di tipo “impossibile” (impossible).
+   - Come sono distribuiti questi conflitti tra i professori:
+     - Ci sono alcuni “più sfortunati” che concentrano molti conflitti?
+     - Ci sono professori che non hanno nessun conflitto?
+
+2. **Spieghi, a parole**, perché è molto difficile (o praticamente impossibile) costruire un orario che renda tutti perfettamente soddisfatti, senza usare formule o codice.  
+   Alcuni esempi di motivazioni che mi aspetto:
+   - Troppi professori che vogliono evitare gli stessi orari (es. tardi nel pomeriggio).
+   - Alcuni slot sono molto richiesti, altri pochissimo.
+   - Ogni professore deve comunque coprire un certo numero di ore, quindi qualcuno dovrà “sacrificarsi” su orari meno graditi.
+   - Vincoli che si sovrappongono rendendo impossibile accontentare tutti contemporaneamente.
+
+3. **Proponi, sempre in linguaggio naturale, delle possibili migliorie all’orario**:
+   - Evidenzia alcuni casi concreti in cui uno scambio di slot tra professori potrebbe:
+     - Ridurre conflitti “impossibile”.
+     - Ridurre il numero di volte in cui qualcuno è messo in un orario che aveva indicato come “meglio di no”.
+   - Dai esempi di scambi del tipo:
+     - “Il professore A potrebbe scambiare questo slot con il professore B, perché per B questo orario non è un problema, mentre per A lo è molto.”
+   - Spiega sempre i pro e i contro di questi scambi:
+     - Chi migliora la propria situazione.
+     - Se qualcuno peggiora leggermente, ma in modo accettabile.
+   - Mantieni l’attenzione sull’idea di **equilibrio generale**: non si tratta di rendere felice uno solo, ma di trovare un compromesso più equo per tutti.
+
+---
+
+### Stile della risposta
+
+- Rispondi in **inglese**, con un linguaggio chiaro, concreto e comprensibile da professori non informatici, non citare i nomi dei file json
+- Non usare formule matematiche, né codice, né simboli strani, né LaTeX, né Markdown
+- Voglio la risposta ritornata in un formato JSON PURO siccome va parserizzato, che deve essere organizzato con un criterio tipo:
+  "report_title": "Titolo principale del report",
+  "summary": "Un breve riassunto esecutivo di 1-2 frasi (opzionale)",
+  "sections": [
+    
+      "id": "section_unique_id",
+      "title": "Titolo della Sezione (es. Analisi Situazione)",
+      "content_blocks": [
+
+          "type": "paragraph", 
+          "text": "Qui c'è il testo discorsivo...",
+
+          "type": "bullet_list",
+          "items": ["Punto 1", "Punto 2", "Punto 3"],
+        
+          "type": "highlight_box", 
+          "title": "Attenzione",
+          "text": "Messaggio importante o proposta specifica",
+          "severity": "warning" 
+        
+      ]
+      
+  ]
+
+- Mantieni la risposta **non troppo abbondante**: lunghezza contenuta, senza muri di testo, adatta a essere mostrata dentro un’interfaccia React (indicativamente 4–6 paragrafi principali più qualche elenco puntato).
+- Se devi fare riferimento a professori specifici, fallo sempre con il loro identificativo (`prof_id_number`), spiegando cosa succede a loro in modo chiaro, poi dovrò sostituire quei placeholders.
+- Se devi fare riferimento a orari specifici, fallo in linguaggio naturale (`Mar 9:30-10:30` diventa `tuesday from 9:30 to 10:30`)
+- Non inventare numeri: se citi quantità (ad es. “ci sono X conflitti impossible”), falle derivare davvero dai dati contenuti nei JSON che ti fornisco.
+
+Ora ti fornirò il contenuto dei file JSON. Usa SOLO quei dati per la tua analisi e le tue spiegazioni.
+
+- constraints.json
+{'iteration': 3, 'constraints': [{'prof_id': 1, 'better_not_slots': [], 'impossible_slots': []}, {'prof_id': 4, 'better_not_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30', 'Lun 10:30-11:30', 'Lun 11:30-12:30', 'Lun 12:30-13:30', 'Lun 13:30-14:30', 'Lun 14:30-15:30', 'Lun 15:30-16:30', 'Lun 16:30-17:30'], 'impossible_slots': []}, {'prof_id': 5, 'better_not_slots': ['Lun 9:30-10:30', 'Lun 10:30-11:30', 'Mer 17:30-18:30', 'Gio 18:30-19:30', 'Ven 8:30-9:30', 'Ven 9:30-10:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Mer 18:30-19:30']}, {'prof_id': 23, 'better_not_slots': ['Mer 15:30-16:30', 'Mer 16:30-17:30', 'Mer 17:30-18:30', 'Mer 18:30-19:30', 'Gio 17:30-18:30', 'Gio 18:30-19:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30'], 'impossible_slots': ['Ven 15:30-16:30', 'Ven 16:30-17:30']}, {'prof_id': 25, 'better_not_slots': ['Lun 16:30-17:30', 'Mar 16:30-17:30', 'Mer 8:30-9:30', 'Mer 16:30-17:30', 'Gio 8:30-9:30', 'Gio 16:30-17:30', 'Ven 8:30-9:30', 'Ven 16:30-17:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Mar 8:30-9:30']}, {'prof_id': 30, 'better_not_slots': ['Mer 8:30-9:30', 'Mer 9:30-10:30', 'Mer 10:30-11:30', 'Mer 11:30-12:30', 'Ven 8:30-9:30', 'Ven 9:30-10:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30'], 'impossible_slots': ['Gio 16:30-17:30', 'Ven 16:30-17:30']}, {'prof_id': 31, 'better_not_slots': ['Mar 8:30-9:30', 'Mar 9:30-10:30', 'Mar 10:30-11:30', 'Mar 11:30-12:30', 'Mar 12:30-13:30', 'Mar 13:30-14:30'], 'impossible_slots': []}, {'prof_id': 32, 'better_not_slots': ['Lun 8:30-9:30', 'Mer 10:30-11:30', 'Mer 11:30-12:30', 'Mer 12:30-13:30', 'Mer 13:30-14:30', 'Mer 14:30-15:30', 'Mer 15:30-16:30', 'Mer 16:30-17:30'], 'impossible_slots': ['Mer 8:30-9:30', 'Mer 9:30-10:30']}, {'prof_id': 33, 'better_not_slots': ['Lun 16:30-17:30', 'Mar 8:30-9:30', 'Mar 16:30-17:30', 'Mer 8:30-9:30', 'Mer 16:30-17:30', 'Gio 8:30-9:30', 'Gio 16:30-17:30', 'Ven 16:30-17:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Ven 8:30-9:30']}, {'prof_id': 35, 'better_not_slots': ['Lun 16:30-17:30', 'Mar 16:30-17:30', 'Mer 8:30-9:30', 'Mer 16:30-17:30', 'Gio 8:30-9:30', 'Gio 16:30-17:30', 'Ven 8:30-9:30', 'Ven 16:30-17:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Mar 8:30-9:30']}, {'prof_id': 41, 'better_not_slots': ['Mar 10:30-11:30', 'Mar 11:30-12:30', 'Mer 10:30-11:30', 'Mer 11:30-12:30', 'Gio 10:30-11:30', 'Gio 11:30-12:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30'], 'impossible_slots': ['Lun 10:30-11:30', 'Lun 11:30-12:30']}, {'prof_id': 43, 'better_not_slots': ['Lun 8:30-9:30', 'Mar 8:30-9:30', 'Mar 16:30-17:30', 'Mer 8:30-9:30', 'Mer 15:30-16:30', 'Gio 8:30-9:30', 'Gio 16:30-17:30', 'Ven 8:30-9:30'], 'impossible_slots': ['Lun 15:30-16:30', 'Ven 15:30-16:30']}, {'prof_id': 44, 'better_not_slots': ['Lun 10:30-11:30', 'Mar 8:30-9:30', 'Mer 8:30-9:30', 'Gio 8:30-9:30', 'Ven 8:30-9:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30']}, {'prof_id': 46, 'better_not_slots': [], 'impossible_slots': ['Ven 17:30-18:30', 'Ven 18:30-19:30']}, {'prof_id': 50, 'better_not_slots': ['Lun 15:30-16:30', 'Mar 15:30-16:30', 'Mar 16:30-17:30', 'Mer 15:30-16:30', 'Mer 16:30-17:30', 'Gio 15:30-16:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30'], 'impossible_slots': ['Lun 16:30-17:30', 'Gio 16:30-17:30']}, {'prof_id': 51, 'better_not_slots': ['Mer 15:30-16:30', 'Mer 16:30-17:30', 'Mer 17:30-18:30', 'Mer 18:30-19:30', 'Gio 15:30-16:30', 'Gio 16:30-17:30', 'Gio 17:30-18:30', 'Gio 18:30-19:30'], 'impossible_slots': ['Mer 14:30-15:30', 'Gio 14:30-15:30']}, {'prof_id': 54, 'better_not_slots': ['Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30', 'Ven 13:30-14:30', 'Ven 14:30-15:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30', 'Ven 17:30-18:30'], 'impossible_slots': ['Lun 18:30-19:30', 'Ven 18:30-19:30']}, {'prof_id': 55, 'better_not_slots': ['Lun 8:30-9:30', 'Lun 15:30-16:30', 'Mar 8:30-9:30', 'Mer 8:30-9:30', 'Gio 8:30-9:30', 'Gio 15:30-16:30', 'Ven 8:30-9:30', 'Ven 15:30-16:30'], 'impossible_slots': ['Mar 15:30-16:30', 'Mer 15:30-16:30']}, {'prof_id': 57, 'better_not_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30', 'Lun 10:30-11:30', 'Mar 8:30-9:30', 'Mar 9:30-10:30', 'Ven 8:30-9:30', 'Ven 9:30-10:30', 'Ven 10:30-11:30'], 'impossible_slots': ['Mer 15:30-16:30', 'Gio 15:30-16:30']}, {'prof_id': 66, 'better_not_slots': ['Lun 8:30-9:30', 'Lun 18:30-19:30', 'Mar 8:30-9:30', 'Mar 18:30-19:30', 'Mer 8:30-9:30', 'Mer 18:30-19:30', 'Gio 8:30-9:30', 'Ven 8:30-9:30'], 'impossible_slots': ['Gio 18:30-19:30', 'Ven 18:30-19:30']}, {'prof_id': 68, 'better_not_slots': ['Lun 14:30-15:30', 'Lun 15:30-16:30', 'Lun 16:30-17:30', 'Mer 14:30-15:30', 'Mer 15:30-16:30', 'Mer 16:30-17:30', 'Mer 17:30-18:30', 'Mer 18:30-19:30'], 'impossible_slots': ['Ven 17:30-18:30', 'Ven 18:30-19:30']}, {'prof_id': 71, 'better_not_slots': ['Lun 10:30-11:30', 'Lun 11:30-12:30', 'Lun 12:30-13:30', 'Lun 13:30-14:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30']}, {'prof_id': 74, 'better_not_slots': ['Lun 10:30-11:30', 'Lun 11:30-12:30', 'Mar 8:30-9:30', 'Mer 8:30-9:30', 'Gio 8:30-9:30', 'Ven 8:30-9:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30']}, {'prof_id': 83, 'better_not_slots': ['Lun 9:30-10:30', 'Mar 9:30-10:30', 'Mer 8:30-9:30', 'Mer 9:30-10:30', 'Gio 8:30-9:30', 'Gio 9:30-10:30', 'Ven 8:30-9:30', 'Ven 9:30-10:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Mar 8:30-9:30']}, {'prof_id': 85, 'better_not_slots': ['Lun 13:30-14:30', 'Mar 13:30-14:30', 'Mer 13:30-14:30', 'Gio 13:30-14:30', 'Ven 13:30-14:30'], 'impossible_slots': []}, {'prof_id': 86, 'better_not_slots': ['Lun 10:30-11:30', 'Lun 11:30-12:30', 'Mar 14:30-15:30', 'Mar 15:30-16:30', 'Mer 14:30-15:30', 'Mer 15:30-16:30'], 'impossible_slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30']}, {'prof_id': 88, 'better_not_slots': ['Gio 17:30-18:30', 'Gio 18:30-19:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30', 'Ven 15:30-16:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30'], 'impossible_slots': ['Gio 16:30-17:30', 'Ven 16:30-17:30']}, {'prof_id': 90, 'better_not_slots': [], 'impossible_slots': []}, {'prof_id': 93, 'better_not_slots': [], 'impossible_slots': []}, {'prof_id': 96, 'better_not_slots': [], 'impossible_slots': []}, {'prof_id': 106, 'better_not_slots': [], 'impossible_slots': []}, {'prof_id': 112, 'better_not_slots': [], 'impossible_slots': []}]}
+
+- assignments.json
+{'iteration': 3, 'assignments': [{'prof_id': 1, 'slots': ['Mar 14:30-15:30', 'Mar 15:30-16:30', 'Mer 9:30-10:30', 'Mer 10:30-11:30', 'Mer 11:30-12:30']}, {'prof_id': 4, 'slots': ['Lun 9:30-10:30', 'Lun 10:30-11:30', 'Lun 11:30-12:30', 'Mar 9:30-10:30', 'Mar 10:30-11:30']}, {'prof_id': 5, 'slots': ['Lun 11:30-12:30', 'Lun 12:30-13:30']}, {'prof_id': 23, 'slots': ['Lun 9:30-10:30', 'Lun 10:30-11:30', 'Lun 11:30-12:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30']}, {'prof_id': 25, 'slots': ['Lun 17:30-18:30', 'Lun 18:30-19:30']}, {'prof_id': 30, 'slots': ['Mar 10:30-11:30', 'Mar 11:30-12:30']}, {'prof_id': 31, 'slots': ['Lun 10:30-11:30', 'Lun 11:30-12:30', 'Lun 12:30-13:30', 'Mar 11:30-12:30', 'Mar 12:30-13:30']}, {'prof_id': 32, 'slots': ['Gio 16:30-17:30', 'Gio 17:30-18:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30', 'Ven 17:30-18:30']}, {'prof_id': 33, 'slots': ['Ven 13:30-14:30', 'Ven 14:30-15:30']}, {'prof_id': 35, 'slots': ['Mer 17:30-18:30', 'Mer 18:30-19:30', 'Gio 13:30-14:30', 'Gio 14:30-15:30', 'Gio 15:30-16:30']}, {'prof_id': 41, 'slots': ['Mer 10:30-11:30', 'Mer 11:30-12:30', 'Ven 14:30-15:30', 'Ven 15:30-16:30', 'Ven 16:30-17:30']}, {'prof_id': 43, 'slots': ['Ven 8:30-9:30', 'Ven 9:30-10:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30']}, {'prof_id': 44, 'slots': ['Gio 8:30-9:30', 'Gio 9:30-10:30', 'Gio 10:30-11:30', 'Gio 16:30-17:30', 'Gio 17:30-18:30']}, {'prof_id': 46, 'slots': ['Gio 12:30-13:30', 'Gio 13:30-14:30']}, {'prof_id': 50, 'slots': ['Mar 16:30-17:30', 'Mar 17:30-18:30', 'Gio 11:30-12:30', 'Gio 12:30-13:30', 'Gio 13:30-14:30']}, {'prof_id': 51, 'slots': ['Mar 13:30-14:30', 'Mar 14:30-15:30', 'Mar 15:30-16:30']}, {'prof_id': 54, 'slots': ['Lun 14:30-15:30', 'Lun 15:30-16:30', 'Lun 16:30-17:30', 'Mar 14:30-15:30', 'Mar 15:30-16:30']}, {'prof_id': 55, 'slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30', 'Lun 10:30-11:30', 'Lun 11:30-12:30', 'Lun 12:30-13:30', 'Lun 15:30-16:30', 'Lun 16:30-17:30', 'Mar 11:30-12:30', 'Mar 12:30-13:30', 'Mar 13:30-14:30']}, {'prof_id': 57, 'slots': ['Gio 9:30-10:30', 'Gio 10:30-11:30']}, {'prof_id': 66, 'slots': ['Mar 12:30-13:30', 'Mar 13:30-14:30', 'Mar 14:30-15:30']}, {'prof_id': 68, 'slots': ['Mar 15:30-16:30', 'Mar 16:30-17:30', 'Gio 15:30-16:30']}, {'prof_id': 71, 'slots': ['Mer 12:30-13:30', 'Mer 13:30-14:30', 'Mer 14:30-15:30', 'Ven 13:30-14:30', 'Ven 14:30-15:30']}, {'prof_id': 74, 'slots': ['Lun 16:30-17:30', 'Lun 17:30-18:30']}, {'prof_id': 83, 'slots': ['Lun 8:30-9:30', 'Mar 14:30-15:30', 'Mar 15:30-16:30', 'Mer 15:30-16:30', 'Mer 16:30-17:30', 'Mer 17:30-18:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30', 'Ven 13:30-14:30', 'Ven 14:30-15:30', 'Ven 15:30-16:30']}, {'prof_id': 85, 'slots': ['Mer 12:30-13:30', 'Mer 13:30-14:30', 'Mer 15:30-16:30', 'Mer 16:30-17:30', 'Gio 10:30-11:30', 'Gio 15:30-16:30', 'Gio 17:30-18:30', 'Gio 18:30-19:30']}, {'prof_id': 86, 'slots': ['Lun 15:30-16:30', 'Lun 16:30-17:30']}, {'prof_id': 88, 'slots': ['Mar 9:30-10:30', 'Mar 10:30-11:30', 'Mar 11:30-12:30', 'Mer 11:30-12:30', 'Mer 12:30-13:30', 'Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30']}, {'prof_id': 90, 'slots': ['Mer 10:30-11:30', 'Mer 11:30-12:30', 'Mer 12:30-13:30']}, {'prof_id': 93, 'slots': ['Lun 8:30-9:30', 'Lun 9:30-10:30', 'Mar 15:30-16:30']}, {'prof_id': 96, 'slots': ['Ven 16:30-17:30', 'Ven 17:30-18:30', 'Ven 18:30-19:30']}, {'prof_id': 106, 'slots': ['Gio 9:30-10:30', 'Gio 10:30-11:30', 'Gio 11:30-12:30']}, {'prof_id': 112, 'slots': ['Mar 8:30-9:30', 'Mar 9:30-10:30', 'Ven 12:30-13:30', 'Ven 13:30-14:30', 'Ven 14:30-15:30']}]}
+
+- conflicts.json
+{'iteration': 3, 'conflicts': [{'prof_id': 1, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 4, 'better_not_unsatisfied': ['Lun 9:30-10:30', 'Lun 10:30-11:30', 'Lun 11:30-12:30'], 'impossible_unsatisfied': []}, {'prof_id': 5, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 23, 'better_not_unsatisfied': ['Ven 17:30-18:30', 'Ven 18:30-19:30'], 'impossible_unsatisfied': []}, {'prof_id': 25, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 30, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 31, 'better_not_unsatisfied': ['Mar 11:30-12:30', 'Mar 12:30-13:30'], 'impossible_unsatisfied': []}, {'prof_id': 32, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 33, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 35, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 41, 'better_not_unsatisfied': ['Mer 10:30-11:30', 'Mer 11:30-12:30'], 'impossible_unsatisfied': []}, {'prof_id': 43, 'better_not_unsatisfied': ['Ven 8:30-9:30'], 'impossible_unsatisfied': []}, {'prof_id': 44, 'better_not_unsatisfied': ['Gio 8:30-9:30'], 'impossible_unsatisfied': []}, {'prof_id': 46, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 50, 'better_not_unsatisfied': ['Mar 16:30-17:30'], 'impossible_unsatisfied': []}, {'prof_id': 51, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 54, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 55, 'better_not_unsatisfied': ['Lun 8:30-9:30', 'Lun 15:30-16:30'], 'impossible_unsatisfied': []}, {'prof_id': 57, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 66, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 68, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 71, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 74, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 83, 'better_not_unsatisfied': [], 'impossible_unsatisfied': ['Lun 8:30-9:30']}, {'prof_id': 85, 'better_not_unsatisfied': ['Mer 13:30-14:30'], 'impossible_unsatisfied': []}, {'prof_id': 86, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 88, 'better_not_unsatisfied': ['Ven 10:30-11:30', 'Ven 11:30-12:30', 'Ven 12:30-13:30'], 'impossible_unsatisfied': []}, {'prof_id': 90, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 93, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 96, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 106, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}, {'prof_id': 112, 'better_not_unsatisfied': [], 'impossible_unsatisfied': []}]}
+
+- fairness_data.json
+{'professors': [{'name': '71', 'fairness': 0.0, 'percentage': 100.0}, {'name': '41', 'fairness': 0.0, 'percentage': 100.0}, {'name': '31', 'fairness': -1.0, 'percentage': 66.0}, {'name': '86', 'fairness': -0.5, 'percentage': 90.0}, {'name': '30', 'fairness': 0.0, 'percentage': 100.0}, {'name': '23', 'fairness': -1.0, 'percentage': 83.0}, {'name': '5', 'fairness': 0.0, 'percentage': 100.0}, {'name': '1', 'fairness': 0.0, 'percentage': 100.0}, {'name': '44', 'fairness': 0.0, 'percentage': 100.0}, {'name': '4', 'fairness': -1.0, 'percentage': 77.0}, {'name': '55', 'fairness': -1.5, 'percentage': 75.0}, {'name': '88', 'fairness': -0.5, 'percentage': 91.0}, {'name': '54', 'fairness': 0.0, 'percentage': 100.0}, {'name': '74', 'fairness': 0.0, 'percentage': 100.0}, {'name': '25', 'fairness': 0.0, 'percentage': 100.0}, {'name': '51', 'fairness': 0.0, 'percentage': 100.0}, {'name': '57', 'fairness': 0.0, 'percentage': 100.0}, {'name': '32', 'fairness': 0.0, 'percentage': 100.0}, {'name': '112', 'fairness': 0.0, 'percentage': 100.0}, {'name': '46', 'fairness': 0.0, 'percentage': 100.0}, {'name': '43', 'fairness': -1.0, 'percentage': 83.0}, {'name': '66', 'fairness': 0.0, 'percentage': 100.0}, {'name': '90', 'fairness': 0.0, 'percentage': 100.0}, {'name': '96', 'fairness': 0.0, 'percentage': 100.0}, {'name': '106', 'fairness': 0.0, 'percentage': 100.0}, {'name': '33', 'fairness': -0.5, 'percentage': 91.0}, {'name': '35', 'fairness': -0.5, 'percentage': 91.0}, {'name': '85', 'fairness': -0.5, 'percentage': 80.0}, {'name': '93', 'fairness': 0.0, 'percentage': 100.0}, {'name': '68', 'fairness': 0.0, 'percentage': 100.0}, {'name': '50', 'fairness': -2.0, 'percentage': 66.0}, {'name': '83', 'fairness': -1.0, 'percentage': 83.0}], 'degrees': {'Fairness Score year 1 Bio': -1.0, 'Fairness Score year 2 Bio': -1.8636363636363638, 'Fairness Score year 3 Bio': -3002.290909090909, 'Fairness Score year 1 Inf': -1.5916666666666668, 'Fairness Score year 2 Inf': -1001.5441176470588, 'Fairness Score year 3 Inf': -1002.0962962962964, 'Fairness Score year 1 BioInf': -1.8333333333333335, 'Fairness Score year 2 BioInf': -1.0909090909090908, 'Fairness Score year 3 BioInf': -0.8625}, 'final_fairness': -278.7370621382672, 'Fairness < 100%': 12, 'Worst Percentage': 66.0}
