@@ -69,16 +69,13 @@ Usando SOLO i dati presenti in questi file, voglio che tu:
 
 - Rispondi in **inglese**, con un linguaggio chiaro, concreto e comprensibile da professori non informatici, non citare i nomi dei file json
 - Non usare formule matematiche, né codice, né simboli strani, né LaTeX, né Markdown
-- Voglio la risposta ritornata in un formato JSON PURO siccome va parserizzato, che deve essere organizzato con un criterio tipo:
-  
+- Voglio la risposta ritornata in un formato JSON PURO (quindi ZERO markdown o elementi di disturbo) siccome andrà parserizzato, che deve essere organizzato con un criterio del tipo:
   "report_title": "Titolo principale del report",
   "summary": "Un breve riassunto esecutivo di 1-2 frasi (opzionale)",
   "sections": [
-    
       "id": "section_unique_id",
       "title": "Titolo della Sezione (es. Analisi Situazione)",
       "content_blocks": [
-
           "type": "paragraph", 
           "text": "Qui c'è il testo discorsivo...",
 
@@ -89,11 +86,8 @@ Usando SOLO i dati presenti in questi file, voglio che tu:
           "title": "Attenzione",
           "text": "Messaggio importante o proposta specifica",
           "severity": "warning" 
-        
       ]
-
   ]
-
 - Mantieni la risposta **non troppo abbondante**: lunghezza contenuta, senza muri di testo, adatta a essere mostrata dentro un’interfaccia React (indicativamente 4–6 paragrafi principali più qualche elenco puntato).
 - Se devi fare riferimento a professori specifici, fallo sempre con il loro identificativo (`prof_id_number`), spiegando cosa succede a loro in modo chiaro, poi dovrò sostituire quei placeholders.
 - Se devi fare riferimento a orari specifici, fallo in linguaggio naturale (`Mar 9:30-10:30` diventa `tuesday from 9:30 to 10:30`)

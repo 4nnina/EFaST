@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminAuth from "../services/AdminAuth";
 import Loading from "../components/Loading";
-import { getExplanationData, geminiAsk } from "../services/ExplainAPI";
+import { askExplanation } from "../services/ExplainAPI";
 
 /* =======================
    TYPES
@@ -115,9 +115,6 @@ function renderReport(report: Report) {
   );
 }
 
-/* =======================
-   PAGE
-======================= */
 
 function ExplainPage() {
   const [report, setReport] = useState<Report | null>(null);
@@ -127,18 +124,22 @@ function ExplainPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await getExplanationData("prompt-v3");
+        const res = await askExplanation("prompt-v3");
 
-        if ("status" in res && res.status === "error") {
-          throw new Error("Errore backend");
+        if (res.issue) {
+          throw new Error(res.issue);
         }
 
-        if ("prompt" in res) {
-          const aiText = await geminiAsk(res.prompt.text);
+        let parsed: Report;
 
-          const parsed: Report = JSON.parse(aiText);
-          setReport(parsed);
+        // ✅ response può essere stringa JSON o oggetto già pronto
+        if (typeof res.response === "string") {
+          parsed = JSON.parse(res.response);
+        } else {
+          parsed = res.response as Report;
         }
+
+        setReport(parsed);
       } catch (e) {
         console.error(e);
         setError("Errore nel caricamento o parsing del report.");
@@ -153,10 +154,11 @@ function ExplainPage() {
   return (
     <AdminAuth>
       <div className="flex flex-col items-center gap-3">
-
         {/* title */}
         <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
-          <h1 className="text-4xl font-extrabold text-white">AI explaination</h1>
+          <h1 className="text-4xl font-extrabold text-white">
+            AI explanation
+          </h1>
         </div>
 
         {loading ? (
@@ -168,7 +170,6 @@ function ExplainPage() {
         ) : (
           <div className="prose max-w-none">Nessun dato disponibile.</div>
         )}
-
       </div>
     </AdminAuth>
   );

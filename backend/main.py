@@ -4,9 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, ExplainInfo, HTML_Placeholder
 from logs.logConfig import logger
-import os, uvicorn, dotenv, json
+import os, uvicorn, dotenv, json, asyncio
 from database.manager import cout
 from glob import glob
+from puter import PuterAI
 
 
 app: FastAPI = FastAPI(
@@ -43,6 +44,17 @@ def run_long_optimization():
     os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
     stdout, stderr = bgProcess.communicate()
 
+def getModelResponse(prompt: str) -> str:
+    puter_ai = PuterAI(username=os.getenv("PUTER_USER"), password=os.getenv("PUTER_PASS"), timeout=200)
+    if puter_ai.login():
+        try:
+            response = puter_ai.chat(prompt=prompt, model="gpt-5.1")
+            puter_ai.clear_chat_history()
+            return response
+        except Exception as e:
+            return "{'issue': '" + str(e) + "'}"
+    return "{'issue': 'No login'}"
+        
 
 @app.post("/auth", summary="Token authentication", tags=["Authentication"])
 async def authenticate(data: TokenInput):
@@ -183,12 +195,20 @@ async def getCSV():
     )
 
 
-@app.post("/explainationData", summary="Getting the calculation data for the LLM", tags=["Get calculation data"])
-async def explainationData(data: ExplainInfo):
+@app.post("/explanation", summary="Getting the calculation data for the LLM", tags=["Get calculation data"])
+async def explanationData(data: ExplainInfo):
     prompt: str = data.prompt if data.prompt else "prompt-v1"
+    expData: dict = FAST.getExplanationData(prompt)
+    response: str = await asyncio.to_thread(
+        getModelResponse,
+        expData["prompt"]["text"]
+    )
     return JSONResponse(
         status_code=200,
-        content=FAST.getExplainationData(prompt)
+        content = {
+            "response": json.loads(response or "{}"),
+            "prompt": expData["prompt"]["text"]
+        } 
     )
 
 

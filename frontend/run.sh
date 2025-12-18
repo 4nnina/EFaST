@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -a
-source .env
-set +a
+FRONTEND_PORT=8000
 
 npm run dev -- --port $FRONTEND_PORT

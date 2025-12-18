@@ -1,5 +1,8 @@
 import json
 
+# this script does not provide anything to the backend logic
+# it's used only to generate a well-formatted prompt
+
 # Run this file from its main directory
 
 promptName: str = "" 

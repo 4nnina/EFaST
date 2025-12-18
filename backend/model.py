@@ -200,7 +200,7 @@ class FAST:
         logger.info(f"[FAST] File '{csvFile}' was updated succesfully.")
 
     @staticmethod
-    def getExplainationData(prompt: str):
+    def getExplanationData(prompt: str):
         
         jsonPath: str = "FAST/university_schedules_stats"
         iterStr: str = "001"
@@ -243,7 +243,7 @@ class FAST:
         
     # deprecated
     @staticmethod
-    def getResultsExplaination(model: str, prompt: str) -> dict:
+    def getResultsExplanation(model: str, prompt: str) -> dict:
         # modelAI: LLM_Model = LLM_Model.get(model, prompt)
         modelAI = 0
         print(modelAI.getModelName())
