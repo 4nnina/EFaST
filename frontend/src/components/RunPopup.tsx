@@ -5,7 +5,7 @@ interface RunPopupProps {
   onClose: () => void;
 }
 
-export default function RunPopup({ onConfirm }: RunPopupProps) {
+export default function RunPopup({ onConfirm, onClose }: RunPopupProps) {
   const [iterationValue, setIterationValue] = useState(5);
 
   const isIntPositive = (n: number) => Number.isInteger(n) && n > 0;
@@ -17,8 +17,16 @@ export default function RunPopup({ onConfirm }: RunPopupProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl p-8 shadow-xl max-w-sm w-full">
+    // OVERLAY (click fuori)
+    <div
+      className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50"
+      onClick={onClose}   // 👈 click FUORI → chiude
+    >
+      {/* PANEL (click dentro) */}
+      <div
+        className="bg-white rounded-2xl p-8 shadow-xl max-w-sm w-full"
+        onClick={(e) => e.stopPropagation()} // 👈 blocca propagazione
+      >
         <h2 className="text-xl font-bold mb-4">Run Optimization</h2>
 
         {/* ITERATION INPUT */}

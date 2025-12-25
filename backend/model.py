@@ -5,13 +5,6 @@ import bcrypt, datetime as dt, json
 import secrets, os, pandas as pd
 
 
-def HTML_Placeholder() -> str:
-    contentHTML: str = "<html><body>backend/index.html file not found.</body></html>"
-    with open("index.html", "r") as homepage:
-        contentHTML = homepage.read()
-    return contentHTML
-
-
 class TokenInput(BaseModel):
     token: str
 
@@ -46,6 +39,13 @@ class DeleteInput(BaseModel):
 
 class ExplainInfo(BaseModel):
     prompt: str
+
+
+def HTML_Placeholder() -> str:
+    contentHTML: str = "<html><body>backend/index.html file not found.</body></html>"
+    with open("index.html", "r") as homepage:
+        contentHTML = homepage.read()
+    return contentHTML
 
 
 class DBManager:
@@ -254,3 +254,13 @@ class FAST:
                 return { "ok": True, "text": response["text"] }
             return { "ok": False, "text": "Something went wrong while generating the response" }
         return { "ok": False, "text": "LLM Authentication failed" }
+
+
+def getDefaultResponse(choice: int = 1, arg = None) -> dict:
+    match choice:
+        case 1:
+            return {"report_title":"AI Explanation unavailable","summary":"The AI explanation service could not be executed due to a configuration issue.","sections":[{"id":"config-error","title":"Configuration error","content_blocks":[{"type":"highlight_box","severity":"error","title":"Missing API token","text":"The backend could not find a valid **ChatGPT API key**. This prevents the AI explanation module from running."},{"type":"bullet_list","items":["The environment variable **GPT_KEY** is not set","The AI service is currently disabled","No optimization data was processed by the LLM"]},{"type":"paragraph","text":"Please ensure that the API key is correctly configured in the backend environment before retrying."}]}]}
+        case 2:
+            return {"report_title":"AI Explanation failed","summary":"An unexpected error occurred while generating the AI explanation.","sections":[{"id":"runtime-error","title":"Execution error","content_blocks":[{"type":"highlight_box","severity":"warning","title":"AI processing error","text":"The AI service encountered an error while processing the explanation request. This may be due to connectivity issues, API limits, or temporary service unavailability."},{"type":"paragraph","text":"The following error message was returned by the backend:"},{"type":"highlight_box","severity":"info","title":"Technical details","text":f"**{arg}**"},{"type":"paragraph","text":"You may retry the request later or consult the backend logs for further diagnostics."}]}]}
+        case _:
+            return dict()

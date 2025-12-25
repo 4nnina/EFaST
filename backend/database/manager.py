@@ -219,7 +219,7 @@ class Query:
 
 
 # debug printer on file stdout
-def cout(obj: any):
+def cout(obj: object):
     with open("cout.txt", "w") as file:
         file.write(str(obj) + "\n")
 

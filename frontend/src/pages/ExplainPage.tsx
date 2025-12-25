@@ -115,9 +115,13 @@ function renderReport(report: Report) {
   );
 }
 
+/* =======================
+   PAGE
+======================= */
 
 function ExplainPage() {
   const [report, setReport] = useState<Report | null>(null);
+  const [iteration, setIteration] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -130,9 +134,14 @@ function ExplainPage() {
           throw new Error(res.issue);
         }
 
+        // 👇 NUOVO: iteration
+        if (typeof res.iteration === "number") {
+          setIteration(res.iteration);
+        }
+
         let parsed: Report;
 
-        // ✅ response può essere stringa JSON o oggetto già pronto
+        // response può essere stringa JSON o oggetto
         if (typeof res.response === "string") {
           parsed = JSON.parse(res.response);
         } else {
@@ -154,11 +163,19 @@ function ExplainPage() {
   return (
     <AdminAuth>
       <div className="flex flex-col items-center gap-3">
-        {/* title */}
+        {/* TITLE */}
         <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
           <h1 className="text-4xl font-extrabold text-white">
             AI explanation
           </h1>
+
+          {/* DISCLAIMER */}
+          {iteration !== null && (
+            <div className="mt-4 text-sm text-gray-200 italic">
+              AI explanation about fairness data for iteration{" "}
+              <span className="font-semibold">{iteration}</span>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -166,9 +183,13 @@ function ExplainPage() {
         ) : error ? (
           <div className="prose max-w-none text-red-600">{error}</div>
         ) : report ? (
-          <div className="prose max-w-none p-8">{renderReport(report)}</div>
+          <div className="prose max-w-none p-8">
+            {renderReport(report)}
+          </div>
         ) : (
-          <div className="prose max-w-none">Nessun dato disponibile.</div>
+          <div className="prose max-w-none">
+            Nessun dato disponibile.
+          </div>
         )}
       </div>
     </AdminAuth>

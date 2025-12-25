@@ -2,12 +2,12 @@ import signal
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
-from model import DBManager, FAST, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, ExplainInfo, HTML_Placeholder
+from model import DBManager, FAST, getDefaultResponse, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, ExplainInfo, HTML_Placeholder
 from logs.logConfig import logger
 import os, uvicorn, dotenv, json, asyncio
-from database.manager import cout
+# from database.manager import cout
 from glob import glob
-from puter import PuterAI
+from openai import OpenAI
 
 
 app: FastAPI = FastAPI(
@@ -24,18 +24,18 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-def run_long_optimization():
+def runFastAlg():
 
     import subprocess, shutil, sys
 
-    output_dir = "FAST/university_schedules_stats/"
-    main_script_path = os.path.abspath("FAST/src/main.py")
+    outputDir = "FAST/university_schedules_stats/"
+    mainScriptPath = os.path.abspath("FAST/src/main.py")
 
-    shutil.rmtree(output_dir, ignore_errors=True)
-    os.makedirs(output_dir, exist_ok=True)
+    shutil.rmtree(outputDir, ignore_errors=True)
+    os.makedirs(outputDir, exist_ok=True)
 
     bgProcess = subprocess.Popen(
-        [sys.executable, main_script_path],
+        [sys.executable, mainScriptPath],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -44,17 +44,24 @@ def run_long_optimization():
     os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
     stdout, stderr = bgProcess.communicate()
 
+
 def getModelResponse(prompt: str) -> str:
-    puter_ai = PuterAI(username=os.getenv("PUTER_USER"), password=os.getenv("PUTER_PASS"), timeout=200)
-    if puter_ai.login():
-        try:
-            response = puter_ai.chat(prompt=prompt, model="gpt-5.1")
-            puter_ai.clear_chat_history()
-            return response
-        except Exception as e:
-            return "{'issue': '" + str(e) + "'}"
-    return "{'issue': 'No login'}"
-        
+    apiKey: str | None = os.getenv("GPT_KEY")
+    if not apiKey:
+        return json.dumps(getDefaultResponse(1))
+    try:
+        client = OpenAI(api_key=apiKey)
+        response = client.chat.completions.create(
+            model = os.getenv("GPT_MODEL"),
+            messages = [
+                {"role": "user", "content": prompt}
+            ],
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return json.dumps(getDefaultResponse(2, e))
+
+
 
 @app.post("/auth", summary="Token authentication", tags=["Authentication"])
 async def authenticate(data: TokenInput):
@@ -114,7 +121,7 @@ async def runOptimization(background_tasks: BackgroundTasks):
         except OSError:
             pass
         del os.environ["FAST_SUBPROCESS"]
-    background_tasks.add_task(run_long_optimization)
+    background_tasks.add_task(runFastAlg)
     return JSONResponse(
         status_code=200,
         content={"status": "started", "message": "Optimization running in background"}
@@ -206,8 +213,9 @@ async def explanationData(data: ExplainInfo):
     return JSONResponse(
         status_code=200,
         content = {
-            "response": json.loads(response or "{}"),
-            "prompt": expData["prompt"]["text"]
+            "response": json.loads(response),
+            "prompt": expData["prompt"]["text"],
+            "iteration": expData["assignments"].get("iteration", 0)
         } 
     )
 

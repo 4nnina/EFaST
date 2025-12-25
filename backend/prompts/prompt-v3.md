@@ -69,7 +69,7 @@ Usando SOLO i dati presenti in questi file, voglio che tu:
 
 - Rispondi in **inglese**, con un linguaggio chiaro, concreto e comprensibile da professori non informatici, non citare i nomi dei file json
 - Non usare formule matematiche, né codice, né simboli strani, né LaTeX, né Markdown
-- Voglio la risposta ritornata in un formato JSON PURO (quindi ZERO markdown o elementi di disturbo) siccome andrà parserizzato, che deve essere organizzato con un criterio del tipo:
+- Voglio la risposta ritornata in un formato JSON PURO (quindi ZERO markdown o elementi di disturbo) siccome andrà parserizzato in un documento, che deve essere organizzato con un criterio del tipo:
   "report_title": "Titolo principale del report",
   "summary": "Un breve riassunto esecutivo di 1-2 frasi (opzionale)",
   "sections": [
