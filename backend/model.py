@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from database.manager import Query, cout
+from database.manager import Query
 from logs.logConfig import logger
 import bcrypt, datetime as dt, json
 import secrets, os, pandas as pd
@@ -72,7 +72,7 @@ class DBManager:
         if len(tokens) >= 3:
             Query.deleteSessionToken(tokens[0]["token"])
         token: str = secrets.token_urlsafe(32)
-        sessionTime: int = int(os.environ["SESSION_TIME"])  # 1 hour
+        sessionTime: int = int(os.environ["SESSION_TIME"])  
         expiring: float = dt.datetime.now().timestamp() + sessionTime
         if Query.insertNewSession(user, token, expiring):
             return token
@@ -145,7 +145,7 @@ class DBManager:
         if maxnot<0 or maxNOT<0:
             issues.append("Max input values must be integers")
         if user!="X":
-            if Query.isNamePresent(user) == 1:
+            if Query.isNamePresent(user):
                 issues.append(f"Username {user} is already taken")
 
         count: list[dict] = list(Query.getMaxCountFromUser(userId))
@@ -160,8 +160,6 @@ class DBManager:
         elif len(count)==2:
             max_n = count[0]["count"]
             max_N = count[1]["count"]  
-
-        # cout(f"{max_n}>{maxnot} or {max_N}>{maxNOT}")
 
         if max_n > maxnot or max_N > maxNOT:
             issues.append(f"Max input values are lower than actual preferences of userId {userId}")
@@ -241,20 +239,6 @@ class FAST:
             }
         }
         
-    # deprecated
-    @staticmethod
-    def getResultsExplanation(model: str, prompt: str) -> dict:
-        # modelAI: LLM_Model = LLM_Model.get(model, prompt)
-        modelAI = 0
-        print(modelAI.getModelName())
-        if modelAI.authenticate():
-            response: dict = modelAI.send()
-            modelAI.close()
-            if response["ok"]:
-                return { "ok": True, "text": response["text"] }
-            return { "ok": False, "text": "Something went wrong while generating the response" }
-        return { "ok": False, "text": "LLM Authentication failed" }
-
 
 def getDefaultResponse(choice: int = 1, arg = None) -> dict:
     match choice:

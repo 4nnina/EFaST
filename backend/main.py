@@ -1,19 +1,17 @@
-import signal
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from model import DBManager, FAST, getDefaultResponse, TokenInput, LoginInput, UpdateInput, DeleteInput, BaseUserInfo, RegisterInfo, ExplainInfo, HTML_Placeholder
 from logs.logConfig import logger
-import os, uvicorn, dotenv, json, asyncio
-# from database.manager import cout
+import os, uvicorn, dotenv, json, asyncio, signal
 from glob import glob
 from openai import OpenAI
 
 
 app: FastAPI = FastAPI(
-    title="FAST Backend API",
-    description="FastAPI backend documentation for F.A.S.T. thesis project (UNIVR)",
-    version="1.0.1"
+    title="FAST Python Backend",
+    description="API documentation for FAST thesis project (UNIVR) (<a href='https://github.com/Fortu032/FAST_thesis' target='_blank'>This repo</a>) (<a href='https://github.com/4nnina/FAST-UI#' target='_blank'>Previous project</a>)",
+    version="1.3.2"
 )
 
 app.add_middleware(
@@ -24,12 +22,14 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
+# Starts FAST Algorithm as a subprocess
 def runFastAlg():
 
     import subprocess, shutil, sys
 
-    outputDir = "FAST/university_schedules_stats/"
-    mainScriptPath = os.path.abspath("FAST/src/main.py")
+    outputDir: str = "FAST/university_schedules_stats/"
+    mainScriptPath: str = os.path.abspath("FAST/src/main.py")
 
     shutil.rmtree(outputDir, ignore_errors=True)
     os.makedirs(outputDir, exist_ok=True)
@@ -42,13 +42,16 @@ def runFastAlg():
         env=os.environ.copy()
     )
     os.environ["FAST_SUBPROCESS"] = str(bgProcess.pid)
-    stdout, stderr = bgProcess.communicate()
+    bgProcess.communicate()
 
 
+# Asks ChatGPT to process data in order to get a report
 def getModelResponse(prompt: str) -> str:
+
     apiKey: str | None = os.getenv("GPT_KEY")
     if not apiKey:
         return json.dumps(getDefaultResponse(1))
+    
     try:
         client = OpenAI(api_key=apiKey)
         response = client.chat.completions.create(
@@ -58,12 +61,73 @@ def getModelResponse(prompt: str) -> str:
             ],
         )
         return response.choices[0].message.content
+    
     except Exception as e:
         return json.dumps(getDefaultResponse(2, e))
 
 
 
-@app.post("/auth", summary="Token authentication", tags=["Authentication"])
+@app.get("/info", summary="Fetch user preferences from user name", tags=["Get user preferences"])
+async def fetchInfo(user: str):
+    result: dict = DBManager.getInfoFromUser(user)
+    logger.info(f"[INFO] Fetching user ({user}) preferences.")
+    return JSONResponse(
+        status_code=200,
+        content=result
+    )
+
+
+@app.get("/users", summary="Fetch all users base info, except admin", tags=["Get all users info"])
+async def fetchUsers():
+    result: list[dict] = DBManager.getAllUsers()
+    logger.info("[USERS] Fetching all user basic info.")
+    return JSONResponse(
+        status_code=200,
+        content=result
+    )
+
+
+@app.get("/getJsonFiles", summary="Collection of all FAST algorithm JSON result", tags=["Get JSON Files"])
+async def getJsonFiles():
+    output_dir: str = "FAST/university_schedules_stats/"
+    files: list = sorted(glob(os.path.join(output_dir, 'fairness_data_*.json')))
+    result: list = []
+    for file in files:
+        content: dict | None = None
+        try:
+            with open(file, 'r') as jf:
+                content = json.load(jf)
+        except Exception as e:
+            content = None
+        result.append({
+            'filename': os.path.basename(file),
+            'content': content,
+            'timestamp': os.path.getmtime(file)
+        })
+    return JSONResponse(
+        status_code=200,
+        content=result
+    )
+
+
+@app.get("/getCSV", summary="Getting a CSV file with every constraints in", tags=["Get constraints of all professors"], response_class=FileResponse)
+async def getCSV():
+    csvFile: str = "constraint_professors.csv"
+    csvPath: str = f"FAST/dataset/university/{csvFile}" 
+    return FileResponse(
+        path=csvPath,
+        media_type="text/csv",
+        filename=csvFile
+    )
+
+
+@app.get("/{everyPath:path}", summary="Main homepage HTML template", tags=["Homepage for backend"], response_class=HTMLResponse)
+async def catchRoutes(everyPath: str):
+    logger.debug("[HOMEPAGE] Route catcher, someone wants to see backend documentation.")
+    return HTMLResponse(content=HTML_Placeholder())
+
+
+@app.post("/auth", summary="Token authentication service (bcrypt)", tags=["Authentication"])
 async def authenticate(data: TokenInput):
     result: tuple[bool, str] = DBManager.verifyAuthentication(data.token)
     if result[0]:
@@ -80,7 +144,7 @@ async def authenticate(data: TokenInput):
         )
 
 
-@app.post("/login", summary="User or admin login", tags=["Login"])
+@app.post("/login", summary="User or admin login", tags=["Login into application"])
 async def login(data: LoginInput):
     if DBManager.verifyCredentials(data.username, data.password):
         logger.info(f"[LOGIN] User {data.username} just logged succesfully.")
@@ -95,7 +159,7 @@ async def login(data: LoginInput):
     )
 
 
-@app.post("/register", summary="Register new user", tags=["Register"])
+@app.post("/register", summary="Register new user", tags=["Register into application"])
 async def register(data: RegisterInfo):
     result: bool = DBManager.registerUser(data.user, data.passw, data.maxUnd, data.maxImp)
     if result:
@@ -148,61 +212,7 @@ async def stopOptimization():
     )
 
 
-@app.get("/info", summary="Fetch user preferences from user name", tags=["Get user preferences"])
-async def fetchInfo(user: str):
-    result: dict = DBManager.getInfoFromUser(user)
-    logger.info(f"[INFO] Fetching user ({user}) preferences.")
-    return JSONResponse(
-        status_code=200,
-        content=result
-    )
-
-
-@app.get("/users", summary="Fetch all users base info, except admin", tags=["Get all users info"])
-async def fetchUsers():
-    result: list[dict] = DBManager.getAllUsers()
-    logger.info("[USERS] Fetching all user basic info.")
-    return JSONResponse(
-        status_code=200,
-        content=result
-    )
-
-
-@app.get("/getJsonFiles", summary="Collection of all FAST algorithm JSON result", tags=["Get JSON Files"])
-async def getJsonFiles():
-    output_dir: str = "FAST/university_schedules_stats/"
-    files: list = sorted(glob(os.path.join(output_dir, 'fairness_data_*.json')))
-    result: list = []
-    for file in files:
-        content: dict | None = None
-        try:
-            with open(file, 'r') as jf:
-                content = json.load(jf)
-        except Exception as e:
-            content = None
-        result.append({
-            'filename': os.path.basename(file),
-            'content': content,
-            'timestamp': os.path.getmtime(file)
-        })
-    return JSONResponse(
-        status_code=200,
-        content=result
-    )
-
-
-@app.get("/getCSV", summary="Getting content of 'constraint_professors.csv'", tags=["Get professors' constraints"])
-async def getCSV():
-    csvFile: str = "constraint_professors.csv"
-    csvPath: str = f"FAST/dataset/university/{csvFile}" 
-    return FileResponse(
-        path=csvPath,
-        media_type="text/csv",
-        filename=csvFile
-    )
-
-
-@app.post("/explanation", summary="Getting the calculation data for the LLM", tags=["Get calculation data"])
+@app.post("/explanation", summary="Getting data explanation by ChatGPT API", tags=["Get ChatGPT response"])
 async def explanationData(data: ExplainInfo):
     prompt: str = data.prompt if data.prompt else "prompt-v1"
     expData: dict = FAST.getExplanationData(prompt)
@@ -220,13 +230,7 @@ async def explanationData(data: ExplainInfo):
     )
 
 
-@app.get("/{everyPath:path}", summary="Main homepage HTML template", tags=["Homepage"], response_class=HTMLResponse)
-async def catchRoutes(everyPath: str):
-    logger.debug("[HOMEPAGE] Route catcher, someone wants to see backend documentation.")
-    return HTMLResponse(content=HTML_Placeholder())
-
-
-@app.put("/update", summary="Update user preferences", tags=["Update user preferences"])
+@app.put("/update", summary="Update user timeslot preferences", tags=["Update user preferences"])
 async def updateInfo(data: UpdateInput):
     result: dict = DBManager.getInfoFromUser(data.user)
     if not result:
@@ -240,7 +244,7 @@ async def updateInfo(data: UpdateInput):
     )
 
 
-@app.put("/edit", summary="Edit user base info", tags=["Update user info"])
+@app.put("/edit", summary="Edit user base info (user table)", tags=["Update user info"])
 async def updateBaseInfo(data: BaseUserInfo):
     result: list[str] = DBManager.updateUserInfo(data.id, data.user, data.passw, data.maxUnd, data.maxImp)
     if not result:
@@ -256,7 +260,7 @@ async def updateBaseInfo(data: BaseUserInfo):
     )
 
 
-@app.delete("/remove", summary="Delete user instance and his/her preferences", tags=["Delete all of user"])
+@app.delete("/remove", summary="Delete user instance and its timeslot preferences", tags=["Delete everything for user"])
 async def deleteInfo(data: DeleteInput):
     result: bool = DBManager.deleteUser(data.id)
     if result:
@@ -275,6 +279,6 @@ async def deleteInfo(data: DeleteInput):
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
-    port: int = int(os.environ["FASTAPI_PORT"])  
+    port: int = 5000
     host: str = os.environ["HOST_INTERFACE"]
     uvicorn.run("main:app", host=host, port=port, reload=True)

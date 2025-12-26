@@ -62,6 +62,10 @@ backend/FAST/university_schedules_stats
 backend/FAST/dataset
 backend/FAST/src
 
+!backend/FAST/src/main.py
+!backend/FAST/src/README.md
+!backend/FAST/dataset/README.md
+
 # Migrations
 migrations/
 alembic/

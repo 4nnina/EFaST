@@ -98,7 +98,6 @@ class Query:
         
     @staticmethod
     def deleteSlotsFromUserId(userId: int) -> None:
-        cout(userId)
         with engine.begin() as conn:
             query = delete(slot).where(
                 slot.c["id"] == userId
@@ -210,16 +209,11 @@ class Query:
                 )
             conn.execute(query)
 
-    def isNamePresent(user: str) -> int:
+    @staticmethod
+    def isNamePresent(user: str) -> bool:
         with engine.connect() as conn:
             query = select(users).where(
                 users.c["username"] == user
             )
-            return conn.execute(query).rowcount
-
-
-# debug printer on file stdout
-def cout(obj: object):
-    with open("cout.txt", "w") as file:
-        file.write(str(obj) + "\n")
+            return conn.execute(query).rowcount > 0
 
