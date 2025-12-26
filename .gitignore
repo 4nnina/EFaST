@@ -59,8 +59,8 @@ cout.txt
 *.sqlite3
 !backend/database/db.sqlite3
 backend/FAST/university_schedules_stats
-backend/FAST/dataset
-backend/FAST/src
+backend/FAST/dataset/*
+backend/FAST/src/*
 
 !backend/FAST/src/main.py
 !backend/FAST/src/README.md
