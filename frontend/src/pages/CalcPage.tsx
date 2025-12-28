@@ -15,14 +15,12 @@ function CalcPage() {
 
   const [avg, setAvg] = useState<number[]>([]);
   const [glb, setGlb] = useState<number[]>([]);
-  const [profAvg, setProfAvg] = useState<number[]>([]);  // 👈 NUOVO ARRAY
-
-  // Popup + configurazione di stop (solo iterazioni)
+  const [profAvg, setProfAvg] = useState<number[]>([]);  
+  
   const [isRunPopupOpen, setIsRunPopupOpen] = useState(false);
   const [stopConfig, setStopConfig] = useState<{ type: "iterations"; value: number } | null>(null);
   const [expectedEnd, setExpectedEnd] = useState<string | null>(null);
 
-  // Polling ogni 2s
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
@@ -36,9 +34,6 @@ function CalcPage() {
               const newest = data[data.length - 1];
               setLatestData(newest.content || null);
 
-              // --------------------------
-              // Media local fairness (avg)
-              // --------------------------
               let avgNum = 0;
               if (newest.content?.degrees) {
                 const values = Object.values(newest.content.degrees)
@@ -49,26 +44,20 @@ function CalcPage() {
               }
               setAvg((a) => [...a, avgNum]);
 
-              // --------------------------
-              // Global fairness (glb)
-              // --------------------------
               const glbNum = newest.content?.final_fairness || 0;
               setGlb((g) => [...g, Math.round(glbNum * 100) / 100]);
 
-              // -------------------------------------------------------
-              // Media fairness dei professori (professors[i].fairness)
-              // -------------------------------------------------------
               let professorFair = 0;
               const profs = newest.content?.professors;
 
               if (Array.isArray(profs)) {
                 const list = profs
                   .map((p: any) => Number(p.fairness))
-                  .filter((v) => !isNaN(v)); // solo numeri validi
+                  .filter((v) => !isNaN(v)); 
 
                 if (list.length > 0) {
                   const avg = list.reduce((sum, val) => sum + val, 0) / list.length;
-                  professorFair = Math.round(avg * 100) / 100; // arrotonda a 2 decimali
+                  professorFair = Math.round(avg * 100) / 100; 
                 }
               }
 
@@ -88,7 +77,7 @@ function CalcPage() {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // ▶️ Start / Stop manuale
+
   const handleOptimizationToggle = async () => {
     try {
       if (!isRunning) {
@@ -98,7 +87,7 @@ function CalcPage() {
         prevLength.current = 0;
         setAvg([]);
         setGlb([]);
-        setProfAvg([]);  // 👈 RESET NUOVO ARRAY
+        setProfAvg([]); 
 
         setIsRunning(true);
         setRunState("running");
@@ -116,7 +105,7 @@ function CalcPage() {
     }
   };
 
-  // ▶️ Start con configurazione (solo iterazioni)
+
   const handleStartWithConfig = async (config: { type: "iterations"; value: number }) => {
     setIsRunPopupOpen(false);
     setStopConfig(config);
@@ -134,7 +123,7 @@ function CalcPage() {
     handleOptimizationToggle();
   };
 
-  // ⏹ Auto-Stop (solo iterazioni)
+
   useEffect(() => {
     if (!isRunning || !stopConfig) return;
 
@@ -145,9 +134,6 @@ function CalcPage() {
     }
   }, [isRunning, stopConfig, files.length]);
 
-  // ----------------------
-  // Interpretazione dati
-  // ----------------------
 
   const getFairnessTable = () => {
     if (!latestData?.degrees) return null;
@@ -195,9 +181,6 @@ function CalcPage() {
     }
   }
 
-  // ----------------------
-  // Render
-  // ----------------------
 
   return (
     <AdminAuth>

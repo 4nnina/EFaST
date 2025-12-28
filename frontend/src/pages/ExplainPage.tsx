@@ -2,37 +2,11 @@ import { useEffect, useState } from "react";
 import AdminAuth from "../services/AdminAuth";
 import Loading from "../components/Loading";
 import { askExplanation } from "../services/ExplainAPI";
+import type { Report } from "../types/ExplainTypes"
 
-/* =======================
-   TYPES
-======================= */
+const chosenPrompt: string = "prompt-v4"
 
-type ContentBlock =
-  | { type: "paragraph"; text: string }
-  | { type: "bullet_list"; items: string[] }
-  | {
-      type: "highlight_box";
-      title: string;
-      text: string;
-      severity: "warning" | "info" | "error";
-    };
-
-type Section = {
-  id: string;
-  title: string;
-  content_blocks: ContentBlock[];
-};
-
-type Report = {
-  report_title: string;
-  summary: string;
-  sections: Section[];
-};
-
-/* =======================
-   INLINE MARKDOWN (**bold**)
-======================= */
-
+// Inline parser for markdown strings
 function renderInlineMarkdown(text: string) {
   return text.split(/(\*\*.*?\*\*)/g).map((part, i) =>
     part.startsWith("**") && part.endsWith("**") ? (
@@ -43,10 +17,7 @@ function renderInlineMarkdown(text: string) {
   );
 }
 
-/* =======================
-   REPORT RENDERER
-======================= */
-
+// Parser from JSON to Report react-like for LLM answer
 function renderReport(report: Report) {
   return (
     <article className="space-y-12">
@@ -115,9 +86,6 @@ function renderReport(report: Report) {
   );
 }
 
-/* =======================
-   PAGE
-======================= */
 
 function ExplainPage() {
   const [report, setReport] = useState<Report | null>(null);
@@ -128,20 +96,18 @@ function ExplainPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await askExplanation("prompt-v3");
+        const res = await askExplanation(chosenPrompt);
 
         if (res.issue) {
           throw new Error(res.issue);
         }
 
-        // 👇 NUOVO: iteration
         if (typeof res.iteration === "number") {
           setIteration(res.iteration);
         }
 
         let parsed: Report;
 
-        // response può essere stringa JSON o oggetto
         if (typeof res.response === "string") {
           parsed = JSON.parse(res.response);
         } else {
@@ -149,6 +115,7 @@ function ExplainPage() {
         }
 
         setReport(parsed);
+        
       } catch (e) {
         console.error(e);
         setError("Errore nel caricamento o parsing del report.");
@@ -188,7 +155,7 @@ function ExplainPage() {
           </div>
         ) : (
           <div className="prose max-w-none">
-            Nessun dato disponibile.
+            No data available.
           </div>
         )}
       </div>

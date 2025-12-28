@@ -6,7 +6,7 @@ import { registerUser } from "../services/UserAPI";
 import { exportCSV } from "../services/OptAPI";
 
 function AdminPage() {
-  // 👇 tipi validi solo per i campi che vuoi usare nei filtri
+  
   type UserField = "id" | "name";
 
   const [orderBy, setOrderBy] = useState<UserField>("id");
@@ -20,7 +20,7 @@ function AdminPage() {
   }
 
   function register() {
-    setShowRegisterPopup(true); // apre popup
+    setShowRegisterPopup(true); 
   }
 
   async function handleRegisterClose(newUser?: { name: string; password: string; mxUnd: number; mxImp: number }) {

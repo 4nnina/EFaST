@@ -5,7 +5,7 @@ export async function runOptimization() {
     const res = await axios.post(`http://localhost:5000/runOptimization`);
     return res.data;
   } catch (error: any) {
-    console.error("Errore durante l'avvio dell'ottimizzazione:", error);
+    console.error("Error while starting the optimization:", error);
     return {
       status: "error",
       message: error.response?.data?.message || error.message,
@@ -18,7 +18,7 @@ export async function stopOptimization() {
     const res = await axios.post("http://localhost:5000/stopOptimization");
     return res.data;
   } catch (error: any) {
-    console.error("Errore durante l'arresto dell'ottimizzazione:", error);
+    console.error("Error while starting the optimization:", error);
     return {
       status: "error",
       message: error.response?.data?.message || error.message,
@@ -31,7 +31,7 @@ export async function getJsonFiles() {
     const res = await axios.get("http://localhost:5000/getJsonFiles");
     return res.data;
   } catch (error: any) {
-    console.error("Errore nel recupero dei file JSON:", error);
+    console.error("Error while fetching JSON files:", error);
     return [];
   }
 }

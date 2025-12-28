@@ -7,9 +7,8 @@ import type { AdminTableProps } from "../types/PopupTypes";
 function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
   const [data, setData] = useState<User[]>([]);
   const [displayedData, setDisplayedData] = useState<User[]>([]);
-  const [editingUser, setEditingUser] = useState<User | null>(null); // stato popup
+  const [editingUser, setEditingUser] = useState<User | null>(null); 
 
-  // --- FETCH iniziale ---
   useEffect(() => {
     async function fetchUsers() {
       const users: User[] = await getUsers();
@@ -18,7 +17,6 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
     fetchUsers();
   }, []);
 
-  // --- FILTRAGGIO + ORDINAMENTO ---
   useEffect(() => {
     const handler = setTimeout(() => {
       let filtered = [...data];
@@ -47,7 +45,6 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
     return () => clearTimeout(handler);
   }, [data, orderBy, searchField, searchValue]);
 
-  // --- FUNZIONI DI CONTROLLO ---
   function handleCalendar(item: User) {
     window.open(`${window.location.origin}/preferences/${item.name}`, "_blank");
   }
@@ -56,7 +53,6 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
     setEditingUser(item); 
   }
 
-  // 🔹 Quando l’utente salva le modifiche
   function handleEditUser(updatedUser: { id: number; name?: string; mxUnd: number; mxImp: number; password?: string }) {
     
     async function removeUser(){
@@ -80,7 +76,7 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
 
   }
 
-  // 🔹 Quando l’utente elimina
+
   async function handleDeleteUser(userId: number) {
 
     async function removeUser(){
@@ -99,11 +95,11 @@ function AdminTable({ orderBy, searchField, searchValue }: AdminTableProps) {
 
   }
 
-  // 🔹 Quando chiude senza fare nulla
   function handleClosePopup() {
     setEditingUser(null);
   }
 
+  
   return (
     <div className="w-full bg-white shadow-md rounded-lg overflow-hidden border border-gray-300">
       <div className="h-[600px] overflow-y-auto">

@@ -45,12 +45,12 @@ def runFastAlg():
     bgProcess.communicate()
 
 
-# Asks ChatGPT to process data in order to get a report
+# Asks ChatGPT to process data in order to get a parsable report
 def getModelResponse(prompt: str) -> str:
 
     apiKey: str | None = os.getenv("GPT_KEY")
     if not apiKey:
-        return json.dumps(getDefaultResponse(1))
+        return getDefaultResponse(1)
     
     try:
         client = OpenAI(api_key=apiKey)
@@ -60,10 +60,11 @@ def getModelResponse(prompt: str) -> str:
                 {"role": "user", "content": prompt}
             ],
         )
-        return response.choices[0].message.content
+        print(response.choices[0].message.content)
+        return json.loads(response.choices[0].message.content)
     
     except Exception as e:
-        return json.dumps(getDefaultResponse(2, e))
+        return getDefaultResponse(2, e)
 
 
 
@@ -216,14 +217,14 @@ async def stopOptimization():
 async def explanationData(data: ExplainInfo):
     prompt: str = data.prompt if data.prompt else "prompt-v1"
     expData: dict = FAST.getExplanationData(prompt)
-    response: str = await asyncio.to_thread(
+    response: dict = await asyncio.to_thread(
         getModelResponse,
         expData["prompt"]["text"]
     )
     return JSONResponse(
         status_code=200,
         content = {
-            "response": json.loads(response),
+            "response": response,
             "prompt": expData["prompt"]["text"],
             "iteration": expData["assignments"].get("iteration", 0)
         } 

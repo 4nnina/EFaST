@@ -31,7 +31,7 @@ export default function ChatExplainWidget() {
         transition-transform animate-fade-in
       "
     >
-      {/* Icona lampadina */}
+      {/* Bulb icon */}
       <div
         className="
           w-12 h-12 rounded-full flex items-center justify-center
@@ -42,7 +42,7 @@ export default function ChatExplainWidget() {
         💡
       </div>
 
-      {/* Testo */}
+      {/* Text */}
       <div className="text-sm font-semibold leading-snug text-white">
         <span className="font-bold">Need an explanation?</span><br />
         AI can walk you through <br/> these results, click here!

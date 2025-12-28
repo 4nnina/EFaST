@@ -83,7 +83,7 @@ Using ONLY the data present in these files, I want you to:
 ### Style of the answer
 
 * Answer in **English**, with clear, concrete language understandable by non computer science professors, do not mention the names of the json files
-* Do not use mathematical formulas, nor code, nor strange symbols, nor LaTeX, nor Markdown
+* Do not use mathematical formulas, nor code, nor strange symbols, nor LaTeX, nor Markdown 
 * I want the answer returned in a PURE JSON format (so ZERO markdown or disturbing elements) since it will be parsed into a document, which must be organized with a structure like:
   ```
   "report_title": "Main report title",
@@ -100,11 +100,11 @@ Using ONLY the data present in these files, I want you to:
       "type": "highlight_box", 
       "title": "Attention",
       "text": "Important message or specific proposal",
-      "severity": "warning" 
+      "severity": "warning" | "error" 
     ]
   ]
   ```
-* Keep the answer **not too long**: contained length, without walls of text, suitable to be shown inside a React interface (approximately 4–6 main paragraphs plus some bullet lists).
+* Keep the answer **not too long**: contained length, without walls of text, suitable to be shown inside a React interface (approximately 4–6 main paragraphs plus some bullet lists). Use at least 1 highlight_box.
 * If you need to refer to specific professors, always do so with their identifier (`prof_id_number`), explaining clearly what happens to them, then I will replace those placeholders.
 * If you need to refer to specific time slots, do so in natural language (`Tue 9:30-10:30` becomes `tuesday from 9:30 to 10:30`)
 * Do not invent numbers: if you cite quantities (for example “there are X impossible conflicts”), derive them truly from the data contained in the JSON I provide you.

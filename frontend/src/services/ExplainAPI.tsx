@@ -1,11 +1,5 @@
 import axios from "axios";
-
-interface ExplanationResponse {
-  response: any;   
-  prompt: string;
-  iteration: number;
-  issue?: string;
-}
+import type { ExplanationResponse } from "../types/ExplainTypes";
 
 
 export async function askExplanation(prompt: string): Promise<ExplanationResponse> {

@@ -8,7 +8,6 @@ function EditPopup({ user, onEdit, onDelete, onClose }: EditPopupProps) {
   const [password, setPassword] = useState("");
   const [isValid, setIsValid] = useState(false);
 
-  // Validazione: nome alfanumerico + underscore, max >= 0, password obbligatoria min 4 char
   useEffect(() => {
     const nameValid = (/^[\w]+$/.test(name) && name.length >= 4) || name.length == 0;
     const mxUndValid = Number.isInteger(mxUnd) && mxUnd >= 0;

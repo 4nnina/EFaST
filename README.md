@@ -11,10 +11,24 @@
 
 </div><br>
 
-  Welcome to the FAST Project — a research‑oriented software system combining Python and Node.js (Typescript) to manage and execute the FAST algorithm (repo <a href="https://github.com/4nnina/fair_seq_task_assignment">HERE</a>). <br> This project is created in order to (... future description ...) for a bachelor degree thesis in computer science by Fortunato Alessandro at University Of Verona. <br><br>
+**Welcome to this project**, an application created using **Python** (backend) and **TypeScript** (frontend) to manage and run the **FAST** algorithm (Multi-sided Fairness in Sequential Task Assignment) (repo <a href="https://github.com/4nnina/fair_seq_task_assignment">HERE</a>). <br>
+My task was to improve the graphics of the previous software, enrich the backend (and document it), and introduce the possibility of having the results explained by an LLM (**explanation AI**).<br><br>
+
+A basic user (a **University of Verona professor**) who accesses the software can:
+* change their time preferences, deciding which weekly timeslots to mark as *available*, *better not*, or *impossible*.
+<br>
+
+The **administrator** who accesses the software can:
+
+* change the information of a basic user (such as name, password, maximum number of *better not* and *impossible* slots that can be used);
+* change the time preferences of a basic user as desired;
+* download all constraints of all users in CSV format;
+* start the FAST algorithm while monitoring its progress during the iterations;
+* request AI assistance at any moment during the execution of the algorithm to obtain an overview of the situation, interpret the resulting data, understand why the optimal schedule is (almost) never achievable, and obtain possible ways to improve the schedule as much as possible.
+<br>
 
 
-## 📦 Installation & Setup
+## 📦 Installation & Setup (only Linux-based systems)
 
 1. **Clone and go into the repository**
    ```bash
@@ -28,7 +42,7 @@
    ```bash
    cd backend
    python3 -m venv venv                     
-   source venv/bin/activate                 # On Windows: venv\Scripts\activate
+   source venv/bin/activate                 
    ```
 
    _Installing the libraries_
@@ -41,8 +55,8 @@
 
    ```bash
    cp .env.example .env                     
-   nano .env                                 # Modify with your favorite values
-   rm .env.example                           # Now It's useless
+   nano .env                                 # modify env variables with yours
+   rm .env.example                           # now It's useless
    ```
 
   _Quitting the backend virtual environment_
@@ -57,7 +71,11 @@
    cd ../frontend
    npm install
    ```
-   <br><br>
+
+4. **Integrate the FAST algorithm into the backend** <br>
+
+To complete the setup, you must perform the steps indicated in `backend/FAST/dataset/README.md` and `backend/FAST/src/README.md`. <br><br>
+
 
 ## 🚀 Running the Application
 
@@ -83,63 +101,33 @@
 
 4. **Open the following link to see the backend server documentation (optional)**
 
-   ```bash
-   http://127.0.0.1:{FASTAPI_PORT}                # FASTAPI_PORT = value from variable in .env
-   ```
+   <a href="http://127.0.0.1:5000"> ``` http://127.0.0.1:5000 ``` </a>
 
 5. **Open the following link to get to the final application**
 
    ```bash
-   http://127.0.0.1:{VITE_PORT}              # VITE_PORT = value from variable in 'frontend/run.sh'
+   http://127.0.0.1:{FRONTEND_PORT}              # FRONTEND_PORT = value from variable in 'frontend/run.sh'
    ```
-   Default port is 8000, so then: <a href="http://127.0.0.1:8000"> ``` http://127.0.0.1:8000 ``` </a><br><br>
+   Default port is 8000, so then: <a href="http://127.0.0.1:8000"> ``` http://127.0.0.1:8000 ``` </a><br>
 
-## 📁 Project Structure
+6. **Log in as base user or admin**
 
-```
-.
-├── backend
-│   ├── database
-│   │   ├── db.sqlite3                    # example db (already populated with fake data) 
-│   │   └── manager.py                    # classes for query management and db scheme
-│   ├── .env.example                   # example format for .env file
-│   ├── FAST                  # FAST algorithm directory (* see below)
-│   │   └── ...
-│   ├── index.html                  # main template to render 
-│   ├── logs                  # backend logging configuration and collector
-│   │   └── ...                  
-│   ├── main.py                     # entry point for the backend, routes collection
-│   ├── model.py                    # classes for data management
-│   ├── requirements.txt                  # needed python libraries
-│   └── run.sh                  # backend starter
-├── frontend
-│   ├── public                   # static files 
-│   │   └── ...
-│   ├── assets                   # available files for react
-│   │   └── ...
-│   ├── README.md                   # this file
-│   ├── run.sh                   # frontend starter
-│   ├── src
-│   │   ├── App.tsx                 # application global component
-│   │   ├── components                    # components used by the pages
-│   │   │   └── ...
-│   │   ├── main.tsx                   # entry point for the application
-│   │   ├── pages                   # main pages of the frontend
-│   │   │   └── ...
-│   │   ├── services                # API services 
-│   │   │   └── ...
-│   │   └── types                   # typescript type interfaces
-│   │       └── ...
-│   └── ...
-└── LICENSE.txt                  # license
-```
+   Currently, these dummy credentials are set in `backend/database/db.sqlite3`.
 
-(*) This directory contains the folders `src/` and `dataset/`, taken from <a href="https://github.com/4nnina/fair_seq_task_assignment">the FAST repo</a>. The file `src/main.py` comes from the previous thesis project. <br><br>
+   | Username | Password |
+   |------|-----|
+   | admin | pallone |
+   | prof1  | ciaone |
+   | prof2  | ciaone |
+   | ...  | ciaone |
+   | prof111  | ciaone |
+   | prof112  | ciaone |
+
+<br>
 
 ## 📌 Credits
 
-Previous thesis project (by Andrea Rosa): <a href="https://github.com/4nnina/FAST-UI">https://github.com/4nnina/FAST-UI</a><br><br>
+* Previous thesis project (by Andrea Rosa): <a href="https://github.com/4nnina/FAST-UI">https://github.com/4nnina/FAST-UI</a><br>
+* FAST algorithm (by Anna Dalla Vecchia): <a href="https://github.com/4nnina/fair_seq_task_assignment">https://github.com/4nnina/fair_seq_task_assignment</a>
+<br><br>
 
----
-
-Project is not done yet. <br><br>

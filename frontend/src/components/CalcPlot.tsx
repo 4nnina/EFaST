@@ -13,7 +13,7 @@ import {
 interface CalcPlotProps {
   avg: number[];
   glb: number[];
-  profAvg: number[];   // 👈 NUOVO ARRAY
+  profAvg: number[];   
 }
 
 ChartJS.register(
@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 export function CalcPlot({ avg, glb, profAvg }: CalcPlotProps) {
-  const labels = avg.map((_, i) => i + 1); // Asse x: 1..n
+  const labels = avg.map((_, i) => i + 1); 
 
   const data = {
     labels,
@@ -35,19 +35,19 @@ export function CalcPlot({ avg, glb, profAvg }: CalcPlotProps) {
       {
         label: 'Student Average Fairness',
         data: avg,
-        borderColor: 'rgba(34,197,94,1)', // verde
+        borderColor: 'rgba(34,197,94,1)', 
         backgroundColor: 'rgba(34,197,94,0.2)',
       },
       {
         label: 'Global Fairness',
         data: glb,
-        borderColor: 'rgba(59,130,246,1)', // blu
+        borderColor: 'rgba(59,130,246,1)', 
         backgroundColor: 'rgba(59,130,246,0.2)',
       },
       {
         label: 'Professor Average Fairness',
         data: profAvg,
-        borderColor: 'rgba(168,85,247,1)',   // 💜 viola
+        borderColor: 'rgba(168,85,247,1)',   
         backgroundColor: 'rgba(168,85,247,0.2)',
       },
     ],

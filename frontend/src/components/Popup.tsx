@@ -36,11 +36,11 @@ function Popup(props: any) {
     return (
         <div
             className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50"
-            onClick={() => props.close()} // 🔹 chiude cliccando sullo sfondo
+            onClick={() => props.close()} 
         >
             <div
                 className="bg-white rounded-2xl p-8 shadow-xl max-w-sm w-full"
-                onClick={(e) => e.stopPropagation()} // 🔹 evita chiusura cliccando dentro
+                onClick={(e) => e.stopPropagation()}
             >
                 <p className="text-left text-lg mb-4">
                     <strong>Time:</strong> {props.hour1} - {props.hour2}<br />

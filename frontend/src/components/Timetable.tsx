@@ -10,8 +10,7 @@ function Timetable(props: any) {
         const [hour, minute] = slot.split(":").map(Number);
         const nextHour = hour + 1;
         const endSlot = `${nextHour}:${minute.toString().padStart(2, "0")}`;
-        // alert(`Timeslot ${slot} - ${endSlot} in ${day} is available!`);
-
+        
         if (handler) handler(slot, endSlot, day, getCellColor(day, slot));
 
     };

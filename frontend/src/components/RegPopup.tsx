@@ -8,7 +8,6 @@ function RegPopup({ close }: RegisterPopupProps) {
   const [mxImp, setMxImp] = useState(10);
   const [isValid, setIsValid] = useState(false);
 
-  // Validazione: nome alfanumerico + underscore, password non vuota, max >=0
   useEffect(() => {
     const nameValid = /^[\w]+$/.test(name) && name.length>=4;
     const passwordValid = password.length>=4;
