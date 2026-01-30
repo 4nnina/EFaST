@@ -20,7 +20,7 @@ export default function ChatExplainWidget() {
     <div
       onClick={() => window.open("/explain", "_blank")}
       className="
-        fixed bottom-6 right-6 z-[999]
+        fixed top-1/2 -translate-y-1/2 right-6 z-[999]
         flex items-center gap-3 cursor-pointer select-none
 
         bg-gradient-to-br from-[#7C3AED] to-[#6D28D9]

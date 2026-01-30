@@ -1,8 +1,9 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export async function runOptimization() {
   try {
-    const res = await axios.post(`http://localhost:5000/runOptimization`);
+    const res = await axios.post(`${API_BASE_URL}/runOptimization`);
     return res.data;
   } catch (error: any) {
     console.error("Error while starting the optimization:", error);
@@ -15,7 +16,7 @@ export async function runOptimization() {
 
 export async function stopOptimization() {
   try {
-    const res = await axios.post("http://localhost:5000/stopOptimization");
+    const res = await axios.post(`${API_BASE_URL}/stopOptimization`);
     return res.data;
   } catch (error: any) {
     console.error("Error while starting the optimization:", error);
@@ -28,7 +29,7 @@ export async function stopOptimization() {
 
 export async function getJsonFiles() {
   try {
-    const res = await axios.get("http://localhost:5000/getJsonFiles");
+    const res = await axios.get(`${API_BASE_URL}/getJsonFiles`);
     return res.data;
   } catch (error: any) {
     console.error("Error while fetching JSON files:", error);
@@ -39,7 +40,7 @@ export async function getJsonFiles() {
 export async function exportCSV() {
   try {
 
-    const res = await axios.get("http://localhost:5000/getCSV", {
+    const res = await axios.get(`${API_BASE_URL}/getCSV`, {
       responseType: "blob"
     })
 

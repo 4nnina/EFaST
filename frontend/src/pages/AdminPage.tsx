@@ -4,6 +4,7 @@ import AdminTable from "../components/AdminTable";
 import RegisterPopup from "../components/RegPopup";
 import { registerUser } from "../services/UserAPI";
 import { exportCSV } from "../services/OptAPI";
+import Navbar from "../components/Navbar";
 
 function AdminPage() {
   
@@ -13,11 +14,6 @@ function AdminPage() {
   const [searchBy, setSearchBy] = useState<UserField>("name");
   const [searchValue, setSearchValue] = useState("");
   const [showRegisterPopup, setShowRegisterPopup] = useState(false);
-
-  function logout() {
-    localStorage.removeItem("FastToken");
-    window.location.href = "/login";
-  }
 
   function register() {
     setShowRegisterPopup(true); 
@@ -49,6 +45,7 @@ function AdminPage() {
 
   return (
     <AdminAuth>
+      <Navbar />
       {/* Header */}
       <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
         <h1 className="text-4xl font-extrabold text-white">
@@ -105,13 +102,6 @@ function AdminPage() {
 
         {/* Buttons */}
         <div className="flex gap-6 justify-center">
-          <button
-            onClick={logout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200"
-          >
-            Logout
-          </button>
-
           <button
             onClick={exportCSV}
             className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200"

@@ -39,6 +39,7 @@ class DeleteInput(BaseModel):
 
 class ExplainInfo(BaseModel):
     prompt: str
+    model: str = "gpt-4"
 
 
 def HTML_Placeholder() -> str:
@@ -52,6 +53,7 @@ class DBManager:
 
     @staticmethod
     def verifyCredentials(user: str, password: str) -> bool:
+        
         result: dict | None = Query.getInfoFromUser(user)
         if not result:
             return False
@@ -68,15 +70,23 @@ class DBManager:
     
     @staticmethod       # max 3 session at same time
     def makeTokenSession(user: str) -> str | None:
-        tokens: list[dict] = Query.getSessionsFromUser(user)
-        if len(tokens) >= 3:
-            Query.deleteSessionToken(tokens[0]["token"])
-        token: str = secrets.token_urlsafe(32)
-        sessionTime: int = int(os.environ["SESSION_TIME"])  
-        expiring: float = dt.datetime.now().timestamp() + sessionTime
-        if Query.insertNewSession(user, token, expiring):
-            return token
-        return None
+        try:
+            tokens: list[dict] = Query.getSessionsFromUser(user)
+            if len(tokens) >= 3:
+                Query.deleteSessionToken(tokens[0]["token"])
+            token: str = secrets.token_urlsafe(32)
+            sessionTime: int = int(os.environ["SESSION_TIME"])  
+            expiring: float = dt.datetime.now().timestamp() + sessionTime
+            result = Query.insertNewSession(user, token, expiring)
+            logger.info(f"[SESSION] insertNewSession returned: {result}")
+            if result:
+                logger.info(f"[SESSION] Token created for user {user}: {token}")
+                return token
+            logger.warning(f"[SESSION] Failed to insert session for user {user}")
+            return None
+        except Exception as e:
+            logger.error(f"[SESSION] Error creating session: {e}")
+            return None
     
     @staticmethod
     def getInfoFromUser(user: str) -> dict:
@@ -203,15 +213,13 @@ class FAST:
         jsonPath: str = "FAST/university_schedules_stats"
         iterStr: str = "001"
 
-        jsonFiles = len(os.listdir(jsonPath))
-        iter = jsonFiles - 3
-
-        if 1 <= iter and iter <= 9:
-            iterStr = f"00{iter}"
-        elif 10 <= iter and iter <= 99:
-            iterStr = f"0{iter}"
-        elif 100 <= iter and iter <= 999:
-            iterStr = f"{iter}"
+        # Find the latest fairness_data file
+        fairness_files = [f for f in os.listdir(jsonPath) if f.startswith("fairness_data_") and f.endswith(".json")]
+        if fairness_files:
+            fairness_files.sort()
+            latest_file = fairness_files[-1]
+            # Extract iteration number from filename (e.g., "fairness_data_030.json" -> "030")
+            iterStr = latest_file.replace("fairness_data_", "").replace(".json", "")
 
         def jd(jsonData: dict) -> str:
             return json.dumps(jsonData, separators=(",", ":"))

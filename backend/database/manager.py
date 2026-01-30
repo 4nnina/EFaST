@@ -218,22 +218,22 @@ class Query:
             return conn.execute(query).rowcount > 0
 
 
-import bcrypt
+# import bcrypt
 
-def modifyyy() -> bool:
-    hashed = bcrypt.hashpw(
-        "pallone".encode("utf-8"),
-        bcrypt.gensalt()
-    )
+# def modifyyy() -> bool:
+#     hashed = bcrypt.hashpw(
+#         "pallone".encode("utf-8"),
+#         bcrypt.gensalt()
+#     )
 
-    with engine.begin() as conn:
-        query = (
-            update(users)
-            .where(users.c["username"] == "admin")
-            .values(password=hashed)
-        )
-        return conn.execute(query).rowcount == 1
-    print("DONE")
+#     with engine.begin() as conn:
+#         query = (
+#             update(users)
+#             .where(users.c["username"] == "admin")
+#             .values(password=hashed)
+#         )
+#         return conn.execute(query).rowcount == 1
+#     print("DONE")
 
 
-modifyyy()
+# modifyyy()

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import type { Auth } from "../types/UserTypes";
 
 async function getToken(): Promise<Auth | null> {
@@ -8,7 +9,7 @@ async function getToken(): Promise<Auth | null> {
     if (!token) return null;
 
     try {
-        const response = await axios.post("http://localhost:5000/auth", {token});
+        const response = await axios.post(`${API_BASE_URL}/auth`, {token});
         return response.data as Auth;
     } catch (error) {
         console.log("Error during token authentication:", error);

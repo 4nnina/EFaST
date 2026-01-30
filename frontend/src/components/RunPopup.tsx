@@ -6,7 +6,7 @@ interface RunPopupProps {
 }
 
 export default function RunPopup({ onConfirm, onClose }: RunPopupProps) {
-  const [iterationValue, setIterationValue] = useState(5);
+  const [iterationValue, setIterationValue] = useState(100);
 
   const isIntPositive = (n: number) => Number.isInteger(n) && n > 0;
   const isValid = isIntPositive(iterationValue);

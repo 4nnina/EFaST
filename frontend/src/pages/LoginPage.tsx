@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios, { isAxiosError } from "axios";
+import { API_BASE_URL } from "../config";
 
 function LoginPage() {
 
@@ -12,7 +13,7 @@ function LoginPage() {
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://localhost:5000/login", {
+            const response = await axios.post(`${API_BASE_URL}/login`, {
                 username,
                 password,
             });

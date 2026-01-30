@@ -5,6 +5,7 @@ import Timetable from "../components/Timetable";
 import { getInfo, updateInfo} from "../services/UserAPI";
 import Loading from "../components/Loading";
 import Popup from "../components/Popup";
+import Navbar from "../components/Navbar";
 
 function HomePage() {
 
@@ -14,12 +15,7 @@ function HomePage() {
     const [ts, setTs] = useState<any>(null)
 
     const [showPopup, setShowPopup] = useState<boolean>(false); 
-    const [popupData, setPopupData] = useState<{ hour1: string; hour2: string; day: string; color: string } | null>(null); 
-
-    function logoutFunction() {
-        localStorage.removeItem("FastToken");
-        window.location.href = "/login";
-    }
+    const [popupData, setPopupData] = useState<{ hour1: string; hour2: string; day: string; color: string } | null>(null);
 
     useEffect(() => {
 
@@ -143,6 +139,7 @@ function HomePage() {
 
     return (
         <Auth>
+            <Navbar />
 
             {/* Welcome title */}
             <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
@@ -194,12 +191,8 @@ function HomePage() {
                 </div>
 
 
-                {/* Logout & Save buttons */}
+                {/* Save button */}
                 <div className="flex gap-6 justify-center">
-                    <button onClick={ logoutFunction } className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200">
-                        Logout
-                    </button>
-                    <p></p>
                     <button onClick={ () => { updateInfo(user, ts); } } className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200">
                         Save preferences
                     </button>

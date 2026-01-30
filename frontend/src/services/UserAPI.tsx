@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import type { BaseResponse, Info, User } from "../types/UserTypes";
 
 export async function getInfo(user: string) {
@@ -6,7 +7,7 @@ export async function getInfo(user: string) {
     if (user=="nothing") { return null; }
 
     try {
-        const response = await axios.get("http://localhost:5000/info", {
+        const response = await axios.get(`${API_BASE_URL}/info`, {
             params: {user}
         });
         return response.data as Info;
@@ -22,7 +23,7 @@ export async function updateInfo(user: string, info: any) {
     if (!user || user=="nothing") { return; }
 
     try {
-        await axios.put("http://localhost:5000/update", {
+        await axios.put(`${API_BASE_URL}/update`, {
             user: user,
             timeslots: info.timeslots
         });
@@ -36,7 +37,7 @@ export async function updateInfo(user: string, info: any) {
 export async function getUsers() {
 
     try {
-        const response = await axios.get("http://localhost:5000/users");
+        const response = await axios.get(`${API_BASE_URL}/users`);
         return response.data as User[];
     } catch (error) {
         console.log("Error while fetching all user info:", error);
@@ -48,7 +49,7 @@ export async function getUsers() {
 export async function registerUser(name: string, password: string, mxUnd: number, mxImp: number) {
 
     try {
-        const response = await axios.post("http://localhost:5000/register", {
+        const response = await axios.post(`${API_BASE_URL}/register`, {
             user: name,
             passw: password,
             maxUnd: mxUnd,
@@ -67,7 +68,7 @@ export async function registerUser(name: string, password: string, mxUnd: number
 export async function deleteUser(userId: number) {
 
     try {
-        const response = await axios.delete("http://localhost:5000/remove", {
+        const response = await axios.delete(`${API_BASE_URL}/remove`, {
             data: {id: userId}
         });
         return response.data as BaseResponse;
@@ -83,7 +84,7 @@ export async function deleteUser(userId: number) {
 export async function editUser(userId: number, name: string, password: string, mxUnd: number, mxImp: number) {
 
     try {
-        const response = await axios.put("http://localhost:5000/edit", {
+        const response = await axios.put(`${API_BASE_URL}/edit`, {
             id: userId,
             user: name,
             passw: password,

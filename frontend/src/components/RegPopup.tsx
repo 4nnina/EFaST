@@ -1,92 +1,69 @@
-import { useState, useEffect } from "react";
-import type { RegisterPopupProps } from "../types/PopupTypes";
+import { useState } from "react";
 
-function RegPopup({ close }: RegisterPopupProps) {
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [mxUnd, setMxUnd] = useState(10);
-  const [mxImp, setMxImp] = useState(10);
-  const [isValid, setIsValid] = useState(false);
+interface RunPopupProps {
+  onConfirm: (config: { type: "iterations"; value: number }) => void;
+  onClose: () => void;
+}
 
-  useEffect(() => {
-    const nameValid = /^[\w]+$/.test(name) && name.length>=4;
-    const passwordValid = password.length>=4;
-    const mxUndValid = Number.isInteger(mxUnd) && mxUnd >= 0;
-    const mxImpValid = Number.isInteger(mxImp) && mxImp >= 0;
-    setIsValid(nameValid && passwordValid && mxUndValid && mxImpValid);
-  }, [name, password, mxUnd, mxImp]);
+export default function RunPopup({ onConfirm, onClose }: RunPopupProps) {
+  const [iterationValue, setIterationValue] = useState(100);
+
+  const isIntPositive = (n: number) => Number.isInteger(n) && n > 0;
+  const isValid = isIntPositive(iterationValue);
+
+  const handleConfirm = () => {
+    if (!isValid) return;
+    onConfirm({ type: "iterations", value: iterationValue });
+  };
 
   return (
+    // OVERLAY (click fuori)
     <div
       className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50"
-      onClick={() => close()}
+      onClick={onClose}   // 👈 click FUORI → chiude
     >
+      {/* PANEL (click dentro) */}
       <div
         className="bg-white rounded-2xl p-8 shadow-xl max-w-sm w-full"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // 👈 blocca propagazione
       >
-        <p className="text-left text-lg mb-4">
-          <strong>Register new user</strong>
-        </p>
+        <h2 className="text-xl font-bold mb-4">Run Optimization</h2>
 
+        {/* ITERATION INPUT */}
         <div className="mb-4">
-          <label className="block text-left font-semibold mb-1">Username:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
+          <label className="block font-semibold mb-1">Iterations:</label>
 
-        <div className="mb-4">
-          <label className="block text-left font-semibold mb-1">Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-left font-semibold mb-1">Max Better Not:</label>
           <input
             type="number"
-            value={mxUnd}
-            onChange={(e) => setMxUnd(Number(e.target.value))}
-            min={0}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            min={1}
+            value={iterationValue}
+            onChange={(e) => setIterationValue(Number(e.target.value))}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-600"
           />
+
+          {!isValid && (
+            <p className="text-red-500 text-sm mt-1">
+              Please enter a positive whole number.
+            </p>
+          )}
         </div>
 
-        <div className="mb-6">
-          <label className="block text-left font-semibold mb-1">Max Impossible:</label>
-          <input
-            type="number"
-            value={mxImp}
-            onChange={(e) => setMxImp(Number(e.target.value))}
-            min={0}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
-
-        <div className="flex justify-center">
+        {/* START BUTTON */}
+        <div className="flex justify-center mt-6">
           <button
-            onClick={() => close({ name, password, mxUnd, mxImp })}
+            onClick={handleConfirm}
             disabled={!isValid}
-            className={`px-6 py-2 rounded-lg shadow-md font-semibold transition duration-200
-              ${isValid
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            className={`px-8 py-2 rounded-lg font-semibold shadow-md transition
+              ${
+                isValid
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
               }`}
           >
-            Register
+            Start
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-export default RegPopup;

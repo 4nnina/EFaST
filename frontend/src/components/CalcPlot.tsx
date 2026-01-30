@@ -27,28 +27,35 @@ ChartJS.register(
 );
 
 export function CalcPlot({ avg, glb, profAvg }: CalcPlotProps) {
-  const labels = avg.map((_, i) => i + 1); 
+  const maxLength = Math.max(avg.length, glb.length, profAvg.length);
+  const labels = Array.from({ length: maxLength }, (_, i) => (i + 1).toString());
 
   const data = {
     labels,
     datasets: [
       {
-        label: 'Student Average Fairness',
+        label: 'Average Professor Fairness',
         data: avg,
-        borderColor: 'rgba(34,197,94,1)', 
-        backgroundColor: 'rgba(34,197,94,0.2)',
+        borderColor: 'rgba(168,85,247,1)',
+        backgroundColor: 'rgba(168,85,247,0.1)',
+        borderWidth: 2,
+        tension: 0.1,
       },
       {
-        label: 'Global Fairness',
+        label: 'Average Degree Fairness',
         data: glb,
-        borderColor: 'rgba(59,130,246,1)', 
-        backgroundColor: 'rgba(59,130,246,0.2)',
+        borderColor: 'rgba(34,197,94,1)',
+        backgroundColor: 'rgba(34,197,94,0.1)',
+        borderWidth: 2,
+        tension: 0.1,
       },
       {
-        label: 'Professor Average Fairness',
+        label: 'Average Overall Fairness',
         data: profAvg,
-        borderColor: 'rgba(168,85,247,1)',   
-        backgroundColor: 'rgba(168,85,247,0.2)',
+        borderColor: 'rgba(59,130,246,1)',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        borderWidth: 2,
+        tension: 0.1,
       },
     ],
   };

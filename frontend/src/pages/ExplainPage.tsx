@@ -3,6 +3,7 @@ import AdminAuth from "../services/AdminAuth";
 import Loading from "../components/Loading";
 import { askExplanation } from "../services/ExplainAPI";
 import type { Report } from "../types/ExplainTypes"
+import Navbar from "../components/Navbar";
 
 const chosenPrompt: string = "prompt-v4"
 
@@ -90,45 +91,58 @@ function renderReport(report: Report) {
 function ExplainPage() {
   const [report, setReport] = useState<Report | null>(null);
   const [iteration, setIteration] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4");
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await askExplanation(chosenPrompt);
+  const availableModels = [
+    { value: "gpt-5", label: "GPT-5" },
+    { value: "gpt-5-mini", label: "GPT-5 Mini" },
+    { value: "gpt-4", label: "GPT-4" },
+    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    { value: "gpt-4o", label: "GPT-4o" },
+    { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" }
+  ];
 
-        if (res.issue) {
-          throw new Error(res.issue);
-        }
+  async function handleGenerateExplanation() {
+    setLoading(true);
+    setError(null);
+    setReport(null);
+    setIteration(null);
 
-        if (typeof res.iteration === "number") {
-          setIteration(res.iteration);
-        }
+    try {
+      const res = await askExplanation(chosenPrompt, selectedModel);
 
-        let parsed: Report;
-
-        if (typeof res.response === "string") {
-          parsed = JSON.parse(res.response);
-        } else {
-          parsed = res.response as Report;
-        }
-
-        setReport(parsed);
-        
-      } catch (e) {
-        console.error(e);
-        setError("Errore nel caricamento o parsing del report.");
-      } finally {
-        setLoading(false);
+      if (res.issue) {
+        throw new Error(res.issue);
       }
-    }
 
-    load();
-  }, []);
+      if (typeof res.iteration === "number") {
+        setIteration(res.iteration);
+      }
+
+      let parsed: Report;
+
+      if (typeof res.response === "string") {
+        parsed = JSON.parse(res.response);
+      } else {
+        parsed = res.response as Report;
+      }
+
+      setReport(parsed);
+        
+    } catch (e) {
+      console.error(e);
+      setError("Errore nel caricamento o parsing del report.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <AdminAuth>
+      <Navbar />
       <div className="flex flex-col items-center gap-3">
         {/* TITLE */}
         <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
@@ -143,6 +157,31 @@ function ExplainPage() {
               <span className="font-semibold">{iteration}</span>
             </div>
           )}
+        </div>
+
+        {/* MODEL SELECTOR */}
+        <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <label className="font-semibold text-gray-700">Select GPT Model:</label>
+            <select 
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {availableModels.map(model => (
+                <option key={model.value} value={model.value}>
+                  {model.label}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleGenerateExplanation}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
+            >
+              {loading ? "Generating..." : "Generate Explanation"}
+            </button>
+          </div>
         </div>
 
         {loading ? (

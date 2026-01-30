@@ -46,16 +46,19 @@ def runFastAlg():
 
 
 # Asks ChatGPT to process data in order to get a parsable report
-def getModelResponse(prompt: str) -> str:
+def getModelResponse(prompt: str, model: str = None) -> str:
 
     apiKey: str | None = os.getenv("GPT_KEY")
     if not apiKey:
         return getDefaultResponse(1)
     
+    # Use provided model or fall back to environment variable or default
+    selectedModel = model or os.getenv("GPT_MODEL", "gpt-4")
+    
     try:
         client = OpenAI(api_key=apiKey)
         response = client.chat.completions.create(
-            model = os.getenv("GPT_MODEL"),
+            model=selectedModel,
             messages = [
                 {"role": "user", "content": prompt}
             ],
@@ -109,6 +112,106 @@ async def getJsonFiles():
         content=result
     )
 
+
+@app.get("/latest-timeline", summary="Get latest timeline allocation for degrees", tags=["Get Timeline Data"])
+async def getLatestTimeline():
+    output_dir: str = "FAST/university_schedules_stats/"
+    
+    # Look for timeline allocation files
+    timeline_files: list = sorted(glob(os.path.join(output_dir, 'timeline_allocation_*.json')))
+    
+    if not timeline_files:
+        logger.warning("No timeline allocation files found")
+        return JSONResponse(
+            status_code=200,
+            content={}
+        )
+    
+    # Get the latest (last) timeline file
+    latest_file = timeline_files[-1]
+    logger.info(f"Reading timeline from: {latest_file}")
+    
+    try:
+        with open(latest_file, 'r') as jf:
+            content = json.load(jf)
+        logger.info(f"Successfully loaded timeline with keys: {list(content.keys())}")
+        return JSONResponse(
+            status_code=200,
+            content=content
+        )
+    except Exception as e:
+        logger.error(f"Error reading timeline file: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to read timeline data: {str(e)}"}
+        )
+
+
+@app.get("/module-mapping", summary="Get module ID to module name mapping", tags=["Get Module Data"])
+async def getModuleMapping():
+    mapping_file: str = "FAST/dataset/university/map_module_id.csv"
+    
+    try:
+        if not os.path.exists(mapping_file):
+            logger.error(f"Module mapping file not found at {mapping_file}")
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Module mapping file not found"}
+            )
+        
+        with open(mapping_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        mapping = {}
+        for line in lines[1:]:  # Skip header
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(',', 1)  # Split on first comma only
+            if len(parts) == 2:
+                module_id, module_name = parts
+                mapping[module_id.strip()] = module_name.strip()
+        
+        logger.info(f"Successfully loaded {len(mapping)} module mappings")
+        return JSONResponse(
+            status_code=200,
+            content=mapping
+        )
+    except Exception as e:
+        logger.error(f"Error reading module mapping file: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to read module mapping: {str(e)}"}
+        )
+
+@app.get("/conflicts", summary="Get professor conflicts and unsatisfied constraints", tags=["Get Conflict Data"])
+async def getConflicts():
+    output_dir: str = "FAST/university_schedules_stats/"
+    
+    # Look for conflicts files
+    conflicts_files: list = sorted(glob(os.path.join(output_dir, 'conflicts.json')))
+    
+    if not conflicts_files:
+        logger.warning("No conflicts file found")
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Conflicts file not found"}
+        )
+    
+    try:
+        with open(conflicts_files[0], 'r', encoding='utf-8') as f:
+            content = json.load(f)
+        logger.info(f"Successfully loaded conflicts data")
+        return JSONResponse(
+            status_code=200,
+            content=content
+        )
+    except Exception as e:
+        logger.error(f"Error reading conflicts file: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to read conflicts data: {str(e)}"}
+        )
 
 @app.get("/getCSV", summary="Getting a CSV file with every constraints in", tags=["Get constraints of all professors"], response_class=FileResponse)
 async def getCSV():
@@ -215,10 +318,12 @@ async def stopOptimization():
 @app.post("/explanation", summary="Getting data explanation by ChatGPT API", tags=["Get ChatGPT response"])
 async def explanationData(data: ExplainInfo):
     prompt: str = data.prompt if data.prompt else "prompt-v1"
+    model: str = data.model if data.model else "gpt-4"
     expData: dict = FAST.getExplanationData(prompt)
     response: dict = await asyncio.to_thread(
         getModelResponse,
-        expData["prompt"]["text"]
+        expData["prompt"]["text"],
+        model
     )
     return JSONResponse(
         status_code=200,

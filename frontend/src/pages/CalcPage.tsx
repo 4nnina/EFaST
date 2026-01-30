@@ -4,6 +4,7 @@ import { runOptimization, stopOptimization, getJsonFiles } from "../services/Opt
 import { CalcPlot } from "../components/CalcPlot";
 import RunPopup from "../components/RunPopup";
 import ExplainPopup from "../components/ExplainPopup";
+import Navbar from "../components/Navbar";
 
 function CalcPage() {
   const [files, setFiles] = useState<any[]>([]);
@@ -13,9 +14,9 @@ function CalcPage() {
   const [latestData, setLatestData] = useState<any>(null);
   const prevLength = useRef<number>(0);
 
-  const [avg, setAvg] = useState<number[]>([]);
-  const [glb, setGlb] = useState<number[]>([]);
-  const [profAvg, setProfAvg] = useState<number[]>([]);  
+  const [avgProf, setAvgProf] = useState<number[]>([]);
+  const [avgDegree, setAvgDegree] = useState<number[]>([]);
+  const [avgOverall, setAvgOverall] = useState<number[]>([]);  
   
   const [isRunPopupOpen, setIsRunPopupOpen] = useState(false);
   const [stopConfig, setStopConfig] = useState<{ type: "iterations"; value: number } | null>(null);
@@ -34,39 +35,36 @@ function CalcPage() {
               const newest = data[data.length - 1];
               setLatestData(newest.content || null);
 
-              let avgNum = 0;
-              if (newest.content?.degrees) {
-                const values = Object.values(newest.content.degrees)
-                  .filter(v => typeof v === "number") as number[];
-                if (values.length > 0) {
-                  avgNum = Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100;
-                }
-              }
-              setAvg((a) => [...a, avgNum]);
+              // Process all files to build complete trend arrays
+              const allAvgProf: number[] = [];
+              const allAvgDegree: number[] = [];
+              const allAvgOverall: number[] = [];
 
-              const glbNum = newest.content?.final_fairness || 0;
-              setGlb((g) => [...g, Math.round(glbNum * 100) / 100]);
+              data.forEach((file) => {
+                const avgProfVal = file.content?.avg_prof || 0;
+                allAvgProf.push(Math.round(avgProfVal * 100) / 100);
 
-              let professorFair = 0;
-              const profs = newest.content?.professors;
+                const avgDegreeVal = file.content?.avg_degree || 0;
+                allAvgDegree.push(Math.round(avgDegreeVal * 100) / 100);
 
-              if (Array.isArray(profs)) {
-                const list = profs
-                  .map((p: any) => Number(p.fairness))
-                  .filter((v) => !isNaN(v)); 
+                const avgOverallVal = file.content?.avg_overall || 0;
+                allAvgOverall.push(Math.round(avgOverallVal * 100) / 100);
+              });
 
-                if (list.length > 0) {
-                  const avg = list.reduce((sum, val) => sum + val, 0) / list.length;
-                  professorFair = Math.round(avg * 100) / 100; 
-                }
-              }
-
-              setProfAvg((prev) => [...prev, professorFair]);
+              setAvgProf(allAvgProf);
+              setAvgDegree(allAvgDegree);
+              setAvgOverall(allAvgOverall);
 
             }
 
             prevLength.current = data.length;
             setFiles(data);
+            
+            // Set latestData to the last file within the limit
+            const limitedFiles = stopConfig ? data.slice(0, stopConfig.value) : data;
+            if (limitedFiles.length > 0) {
+              setLatestData(limitedFiles[limitedFiles.length - 1]?.content || null);
+            }
           }
         } catch (err) {
           console.error("Errore nel polling:", err);
@@ -85,9 +83,9 @@ function CalcPage() {
         setLatestData(null);
         setFiles([]);
         prevLength.current = 0;
-        setAvg([]);
-        setGlb([]);
-        setProfAvg([]); 
+        setAvgProf([]);
+        setAvgDegree([]);
+        setAvgOverall([]); 
 
         setIsRunning(true);
         setRunState("running");
@@ -111,7 +109,7 @@ function CalcPage() {
     setStopConfig(config);
 
     const n = config.value;
-    const totalSeconds = 6 * n * n + (23 / 2) * n;
+    const totalSeconds = n * 0.09;
 
     const endDate = new Date(Date.now() + totalSeconds * 1000);
     const formatted =
@@ -152,7 +150,9 @@ function CalcPage() {
       if (match) {
         const [_, year, code] = match;
         const name = degreeMap[code];
-        if (!grouped[name]) grouped[name] = {};
+        if (!grouped[name]) {
+          grouped[name] = { code }; // Store the code for later use
+        }
         grouped[name][`Year ${year}`] = value;
       }
     });
@@ -162,10 +162,25 @@ function CalcPage() {
 
   const tableData = getFairnessTable();
 
-  const totalProfessors = latestData?.professors?.length || 0;
-  const unfairProfessors = latestData?.["Fairness < 100%"] || 0;
-  const worstFairness = latestData?.["Worst Percentage"] || 0;
-  const globalFairness = latestData?.final_fairness?.toFixed(2) || "0";
+  // Limit displayed data to stopConfig.value
+  const displayedAvgProf = stopConfig ? avgProf.slice(0, stopConfig.value) : avgProf;
+  const displayedAvgDegree = stopConfig ? avgDegree.slice(0, stopConfig.value) : avgDegree;
+  const displayedAvgOverall = stopConfig ? avgOverall.slice(0, stopConfig.value) : avgOverall;
+  const displayedFiles = stopConfig ? files.slice(0, stopConfig.value) : files;
+  
+  // Get latest data from limited files
+  const limitedLatestData = stopConfig && displayedFiles.length > 0 ? displayedFiles[displayedFiles.length - 1]?.content : latestData;
+
+  const totalProfessors = limitedLatestData?.professors?.length || 0;
+  const unfairProfessors = limitedLatestData?.['Fairness < 100%'] || 0;
+  const worstFairness = limitedLatestData?.['Worst Percentage'] || 0;
+  const globalFairness = limitedLatestData?.final_fairness?.toFixed(2) || '0';
+  const AVGglobalFairness = limitedLatestData?.avg_overall?.toFixed(2) || '-';
+  const STDglobalFairness = limitedLatestData?.std_overall?.toFixed(2) || '-';
+  const AVGFairnessStud = limitedLatestData?.avg_degree?.toFixed(2) || '-';
+  const STDFairnessStud = limitedLatestData?.std_degree?.toFixed(2) || '-';
+  const AVGFairnessProf = limitedLatestData?.avg_prof?.toFixed(2) || '-';
+  const STDFairnessProf = limitedLatestData?.std_prof?.toFixed(2) || '-';
 
   // Average fairness (local)
   let fairnessAvg = "-";
@@ -184,6 +199,7 @@ function CalcPage() {
 
   return (
     <AdminAuth>
+      <Navbar />
       <div className="flex flex-col items-center gap-3">
 
         {/* title */}
@@ -220,7 +236,7 @@ function CalcPage() {
               <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
                 <p className="text-sm text-gray-500 font-medium">Iterations</p>
                 <p className="text-xl font-bold mt-1 text-gray-800">
-                  {files.length} / {stopConfig.value}
+                  {displayedFiles.length} / {stopConfig.value}
                 </p>
               </div>
 
@@ -236,8 +252,8 @@ function CalcPage() {
           </div>
         )}
 
-        {/* Results */}
-        {latestData && (
+        {/* Results - Show as soon as data is available */}
+        {(latestData || avgProf.length > 0) && (
           <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md space-y-8">
             <h3 className="text-xl font-semibold text-center mt-6 mb-4">Optimization Results</h3>
 
@@ -245,6 +261,22 @@ function CalcPage() {
             <div className="flex justify-center">
               <table className="border border-gray-300 text-sm rounded-xl">
                 <tbody>
+
+                  <tr className="odd:bg-white even:bg-gray-50">
+                    <td className="px-4 py-2 border font-semibold">Global Fairness &lang;g<sub>a</sub>(A), g<sub>s</sub>(A)&rang;</td>
+                    <td className="px-4 py-2 border">({AVGglobalFairness},{STDglobalFairness})</td>
+                  </tr>
+
+                  <tr className="odd:bg-white even:bg-gray-50">
+                    <td className="px-4 py-2 border font-semibold">Professor Fairness (AVG, STD)</td>
+                    <td className="px-4 py-2 border">({AVGFairnessProf}, {STDFairnessProf})</td>
+                  </tr>
+
+                  <tr className="odd:bg-white even:bg-gray-50">
+                    <td className="px-4 py-2 border font-semibold">Student Cohort Fairness (AVG, STD)</td>
+                    <td className="px-4 py-2 border">({AVGFairnessStud}, {STDFairnessStud})</td>
+                  </tr>
+
                   <tr className="odd:bg-white even:bg-gray-50">
                     <td className="px-4 py-2 border font-semibold">
                       Professors with {'<'} 100% Fairness
@@ -258,15 +290,6 @@ function CalcPage() {
                     </td>
                   </tr>
 
-                  <tr className="odd:bg-white even:bg-gray-50">
-                    <td className="px-4 py-2 border font-semibold">Student Class Average Fairness</td>
-                    <td className="px-4 py-2 border">{fairnessAvg}</td>
-                  </tr>
-
-                  <tr className="odd:bg-white even:bg-gray-50">
-                    <td className="px-4 py-2 border font-semibold">Global Fairness</td>
-                    <td className="px-4 py-2 border">{globalFairness}</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -312,11 +335,25 @@ function CalcPage() {
                       Object.entries(tableData).map(([degree, years]: any) => (
                         <tr key={degree} className="odd:bg-white even:bg-gray-50">
                           <td className="p-2 border font-semibold">{degree}</td>
-                          {["Year 1", "Year 2", "Year 3"].map((year) => (
-                            <td key={year} className="p-2 border">
-                              {years[year] !== undefined ? years[year].toFixed(2) : "-"}
-                            </td>
-                          ))}
+                          {["Year 1", "Year 2", "Year 3"].map((year) => {
+                            const yearNum = year.match(/\d+/)?.[0];
+                            return (
+                              <td
+                                key={year}
+                                onClick={() => {
+                                  if (years[year] !== undefined && years.code) {
+                                    // Pass the degree code (Bio, Inf, BioInf) and just the year number
+                                    window.open(`/fairness/${encodeURIComponent(years.code)}/${encodeURIComponent(yearNum || "1")}?fairness=${years[year]}`, "_blank");
+                                  }
+                                }}
+                                className={`p-2 border cursor-pointer hover:bg-blue-100 transition ${
+                                  years[year] !== undefined ? "hover:shadow-md" : ""
+                                }`}
+                              >
+                                {years[year] !== undefined ? years[year].toFixed(2) : "-"}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                   </tbody>
@@ -325,10 +362,10 @@ function CalcPage() {
             </div>
 
             {/* Plot */}
-            {(avg.length > 0 || glb.length > 0 || profAvg.length > 0) && (
+            {(displayedAvgProf.length > 0 || displayedAvgDegree.length > 0 || displayedAvgOverall.length > 0) && (
               <div className="mt-6 flex justify-center">
                 <div className="w-full max-w-3xl">
-                  <CalcPlot avg={avg} glb={glb} profAvg={profAvg} /> {/* 👈 TERZO ARRAY PASSATO */}
+                  <CalcPlot avg={displayedAvgProf} glb={displayedAvgDegree} profAvg={displayedAvgOverall} />
                 </div>
               </div>
             )}
@@ -359,7 +396,7 @@ function CalcPage() {
         />
       )}
 
-      {latestData && <ExplainPopup />}
+      {limitedLatestData && <ExplainPopup />}
 
     </AdminAuth>
   );

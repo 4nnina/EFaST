@@ -1,12 +1,13 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import type { ExplanationResponse } from "../types/ExplainTypes";
 
 
-export async function askExplanation(prompt: string): Promise<ExplanationResponse> {
+export async function askExplanation(prompt: string, model: string = "gpt-4"): Promise<ExplanationResponse> {
   try {
     const res = await axios.post<ExplanationResponse>(
-      "http://localhost:5000/explanation",
-      { prompt }
+      `${API_BASE_URL}/explanation`,
+      { prompt, model }
     );
     return res.data;
   } catch (error: any) {

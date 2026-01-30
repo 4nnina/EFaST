@@ -5,6 +5,7 @@ import { getInfo, updateInfo} from "../services/UserAPI";
 import Loading from "../components/Loading";
 import Popup from "../components/Popup";
 import { useParams } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 function PrefPage() {
 
@@ -132,6 +133,7 @@ function PrefPage() {
 
     return (
         <AdminAuth>
+            <Navbar />
 
             {/* Welcome title */}
             <div className="w-screen bg-gradient-to-r from-purple-500 via-blue-500 to-blue-300 p-8 text-center shadow-lg mb-2">
