@@ -70,8 +70,18 @@ export function CalcPlot({ avg, glb, profAvg }: CalcPlotProps) {
       },
     },
     scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Iteration',
+        },
+      },
       y: {
         beginAtZero: false,
+        title: {
+          display: true,
+          text: 'Fairness score',
+        },
       },
     },
   };

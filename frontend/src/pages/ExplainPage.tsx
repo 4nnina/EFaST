@@ -93,16 +93,16 @@ function ExplainPage() {
   const [iteration, setIteration] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>("gpt-4");
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-5-mini");
 
   const availableModels = [
     { value: "gpt-5", label: "GPT-5" },
     { value: "gpt-5-mini", label: "GPT-5 Mini" },
-    { value: "gpt-4", label: "GPT-4" },
-    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    //{ value: "gpt-4", label: "GPT-4" },
     { value: "gpt-4o", label: "GPT-4o" },
     { value: "gpt-4o-mini", label: "GPT-4o Mini" },
-    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" }
+    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    //{ value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" }
   ];
 
   async function handleGenerateExplanation() {
@@ -162,7 +162,7 @@ function ExplainPage() {
         {/* MODEL SELECTOR */}
         <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md mt-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <label className="font-semibold text-gray-700">Select GPT Model:</label>
+            <label className="font-semibold text-gray-700">Select Model:</label>
             <select 
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}

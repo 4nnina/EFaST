@@ -47,7 +47,7 @@ function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-700 via-blue-600 to-cyan-400">
             <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-2xl p-10 w-full max-w-md">
                 <h1 className="text-3xl font-bold text-white text-center mb-8 drop-shadow-lg">
-                    Welcome in FAST!
+                    Welcome in EFaST!
                 </h1>
 
                 <form className="space-y-6" onSubmit={handleSubmit}>
