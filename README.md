@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1>🎯 FAST Thesis Project</h1>
+  <h1>🎯 EFaST: An Explainable Framework for Fair Sequential Tasks Assignment</h1>
 
   ![Version](https://img.shields.io/badge/Version-0.1.0-blue)
   ![License](https://img.shields.io/badge/License-MIT-green)
@@ -11,10 +11,12 @@
 
 </div><br>
 
-**Welcome to this project**, an application created using **Python** (backend) and **TypeScript** (frontend) to manage and run the **FAST** algorithm (Multi-sided Fairness in Sequential Task Assignment) (repo <a href="https://github.com/4nnina/fair_seq_task_assignment">HERE</a>). <br>
-My task was to improve the graphics of the previous software, enrich the backend (and document it), and introduce the possibility of having the results explained by an LLM (**explanation AI**).<br><br>
+**EFaST**, an interactive framework for exploring and understanding fairness in multi-stakeholder sequential task assignment problems.  
+This application is created using **Python** (backend) and **TypeScript** (frontend) to manage and run the **FaST** algorithm (Multi-sided Fairness in Sequential Task Assignment) (<a href="https://doi.org/10.1016/j.is.2025.102666">Information System Journal</a>, <a href="https://github.com/4nnina/fair_seq_task_assignment">Github repository</a>).
 
-A basic user (a **University of Verona professor**) who accesses the software can:
+<br><br>
+
+A basic user (i.e., a professor) who accesses the software can:
 * change their time preferences, deciding which weekly timeslots to mark as *available*, *better not*, or *impossible*.
 <br>
 
@@ -23,12 +25,12 @@ The **administrator** who accesses the software can:
 * change the information of a basic user (such as name, password, maximum number of *better not* and *impossible* slots that can be used);
 * change the time preferences of a basic user as desired;
 * download all constraints of all users in CSV format;
-* start the FAST algorithm while monitoring its progress during the iterations;
+* start the FaST-AMOSA algorithm while monitoring its progress during the iterations;
 * request AI assistance at any moment during the execution of the algorithm to obtain an overview of the situation, interpret the resulting data, understand why the optimal schedule is (almost) never achievable, and obtain possible ways to improve the schedule as much as possible.
 <br>
 
 
-## 📦 Installation & Setup (only Linux-based systems)
+## 📦 Installation & Setup
 
 1. **Clone and go into the repository**
    ```bash
@@ -123,11 +125,5 @@ To complete the setup, you must perform the steps indicated in `backend/FAST/dat
    | prof111  | ciaone |
    | prof112  | ciaone |
 
-<br>
-
-## 📌 Credits
-
-* Previous thesis project (by Andrea Rosa): <a href="https://github.com/4nnina/FAST-UI">https://github.com/4nnina/FAST-UI</a><br>
-* FAST algorithm (by Anna Dalla Vecchia): <a href="https://github.com/4nnina/fair_seq_task_assignment">https://github.com/4nnina/fair_seq_task_assignment</a>
 <br><br>
 
