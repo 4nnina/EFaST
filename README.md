@@ -128,7 +128,7 @@ To complete the setup, you must perform the steps indicated in `backend/FAST/dat
 
 <br><br>
 
-## 📷 Case Study
+## 📷 Application Scenario: University Course Scheduling
 
 This section illustrates the EFaST framework through a university course scheduling scenario, where tasks (classes) are assigned over a discrete temporal domain (days × hours), and stakeholders (professors, students) submit constraints and preferences on a weekly calendar to drive the optimization.
 
