@@ -33,7 +33,7 @@ The **administrator** who accesses the software can:
 
 You can also take a look at our demonstration:
 
-[![Watch the video](https://img.youtube.com/vi/Tbw8vYhHXv8/hqdefault.jpg)](https://www.youtube.com/watch?v=Tbw8vYhHXv8)
+[![Watch the video](https://img.youtube.com/vi/JllemrlrsRQ/hqdefault.jpg)](https://youtu.be/JllemrlrsRQ)
 
 ## 📦 Installation & Setup
 
