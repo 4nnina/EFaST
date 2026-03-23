@@ -31,6 +31,10 @@ The **administrator** who accesses the software can:
 <br>
 
 
+You can also take a look at our demonstration:
+
+[![Watch the video](https://img.youtube.com/vi/Tbw8vYhHXv8/hqdefault.jpg)](https://www.youtube.com/watch?v=Tbw8vYhHXv8)
+
 ## 📦 Installation & Setup
 
 #### 1. Clone and go into the repository
